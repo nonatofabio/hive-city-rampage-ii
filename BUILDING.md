@@ -63,3 +63,6 @@ packages, not store submissions. `make build` does not publish a release.
 at 30 FPS with Godot Movie Maker. It applies no scripted damage or invulnerability.
 The MP4 is 960 × 540; the lightweight GIF is 384 × 216 at 10 FPS. Outputs are in
 `static/`; the temporary AVI is removed after successful conversion.
+
+Use `make run GAME_ARGS="--level 2"` to select Iron Belly, and
+`make record-level-two` to record its 16-second gameplay movie.

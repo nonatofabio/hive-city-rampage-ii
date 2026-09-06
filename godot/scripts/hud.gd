@@ -56,7 +56,7 @@ func _draw() -> void:
 	var touch: bool = game.touch_controls.enabled
 	text(("FRAG %02d" if touch else "FRAG %02d  [SPACE / RMB]") % game.grenades,Vector2(30,490),GOLD,12)
 	text("DASH " + ("READY" if game.dash_cd <= 0 else "%.1fs" % game.dash_cd) + ("" if touch else " [SHIFT]"),Vector2(245,490),Color("d2ccb5"),12)
-	var objective := "RELAYS %d/3" % game.relays_down()
+	var objective := ("PUMPS %d/3" if game.level == 2 else "RELAYS %d/3") % game.relays_down()
 	if game.boss_spawned:
 		objective = "REACH EXTRACTION" if game.boss_defeated else "DESTROY THE WALKER"
 	text(objective,Vector2(477,490),Color("e69750"),12)
@@ -71,7 +71,7 @@ func _draw() -> void:
 			target = relay.world_pos
 	for enemy in game.enemies:
 		if enemy.kind == "boss":
-			text("CATHEDRAL-BREAKER",Vector2(348,24),Color("e1976b"),12)
+			text("ORK WARBOSS" if game.level == 2 else "CATHEDRAL-BREAKER",Vector2(348,24),Color("e1976b"),12)
 			draw_rect(Rect2(322,44,322,10),INK)
 			draw_rect(Rect2(323,45,320*maxf(0,enemy.hp)/1800,8),Color("b03626"))
 			target = enemy.world_pos
@@ -93,12 +93,14 @@ func _draw() -> void:
 	if game.paused or game.state != "playing":
 		draw_rect(Rect2(0,0,960,540),Color(0.03,0.04,0.07,0.80))
 		panel(Rect2(240,175,480,185))
-		var title := "PAUSED" if game.paused else ("ASHGATE LIBERATED" if game.state == "won" else "YOU HAVE FALLEN")
+		var title := "PAUSED" if game.paused else (("IRON BELLY SECURED" if game.level == 2 else "ASHGATE LIBERATED") if game.state == "won" else "YOU HAVE FALLEN")
 		text(title,Vector2(270,207),GOLD,30)
 		text("%07d POINTS / %d KILLS / %d SECONDS" % [game.score,game.kills,int(game.time)],Vector2(270,265))
 		var prompt := "ESC TO RESUME" if game.paused else "R TO DEPLOY AGAIN / ESC TO QUIT"
+		if game.state == "won" and game.level == 1 and not touch:
+			prompt = "N FOR IRON BELLY / R TO REPLAY"
 		if touch:
-			prompt = "TAP HERE TO RESUME" if game.paused else "TAP HERE TO DEPLOY AGAIN"
+			prompt = "TAP HERE TO RESUME" if game.paused else "TAP TO DEPLOY IRON BELLY" if game.state == "won" and game.level == 1 else "TAP HERE TO DEPLOY AGAIN"
 		text(prompt,Vector2(270,310),Color("93a4b0"))
 		panel(Rect2(240,373,480,58))
 		var audio_text := "AUDIO %s [M]    GUNFIRE %d%% [- / =]" % ["MUTED" if game.muted else "ON",roundi(game.sfx_volume*100)]

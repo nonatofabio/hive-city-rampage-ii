@@ -1,0 +1,8 @@
+# industry artwork
+
+Generated with OpenAI image generation for this project. The source atlas is retained here; the Godot importer in the project tools folder crops and scales its transparent sprites into runtime assets. Generated poses may have small frame-to-frame differences.
+
+## Generation prompt
+
+Game environment sprite atlas for a detailed grimdark gothic isometric shooter. Exactly 3 columns x 2 rows of six isolated sprites on genuine transparent background, generous margins, 1536x1024. If transparency impossible use solid pure magenta #FF00FF. No text, no checkerboard, no grid. Match chunky hand-painted pixel art, brass, iron, grime, 2:1 isometric ground projection. Top left: industrial coolant pump station, squat chunky iron motor, blue pipes, pressure gauges and handwheel, no spire, no antenna, no red glowing tower. Top middle: long factory wall module aligned down-right at isometric slope, dark corrugated steel with a huge horizontal pipe, brass clamps and rivets, industrial undercity masonry at base. Top right: bulky smelting furnace with orange glowing door and heavy chimney, grey-black steel, warning chevrons. Bottom left: industrial floor vent grate flush to ground, isometric diamond, orange heat glow between bars. Bottom middle: Ork scrap war banner on short pole with red tattered cloth and white tooth motif, planted in small pile of scrap. Bottom right: disabled coolant pump, valves closed, indicator changed from orange to cool green, otherwise exactly the top-left pump's silhouette, a secured machine rather than destroyed. No characters, no active fire or smoke obscuring silhouettes.
+

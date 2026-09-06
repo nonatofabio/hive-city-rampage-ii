@@ -2,7 +2,8 @@
 
 A gothic isometric shooter by **nonatofabio**, built in **Godot 4**.
 Deploy into Ashgate, destroy three signal relays, bring down the siege walker,
-and fight your way to extraction.
+and fight your way to extraction. Then deploy into **Iron Belly**, secure three
+coolant pumps, and defeat an Ork Warboss. Select either mission on the title screen.
 
 ![Hive City Rampage II title screen](static/hive-title.png)
 
@@ -13,6 +14,16 @@ and fight your way to extraction.
 [Watch the 14-second gameplay movie with audio](static/gameplay.mp4).
 Crates, barrels, and relays leave persistent wreckage. Sandbags, concrete barriers,
 and steel tank traps provide indestructible cover.
+
+## Iron Belly — level two
+
+![Iron Belly](static/iron-belly.png)
+
+[Watch level two gameplay](static/iron-belly.mp4). Hold each pump area for eight
+seconds while keeping nearby Orks away. Avoid cycling hot vents, defeat the
+Warboss, and reach extraction. Press N after winning Ashgate (or tap on Android)
+to advance. New art and prompts: [Orks](art/orks/README.md),
+[industrial machinery](art/industry/README.md).
 
 ## Play and develop
 

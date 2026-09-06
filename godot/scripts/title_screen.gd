@@ -7,9 +7,11 @@ var show_orders := false
 @onready var game: SiegeGame = get_parent().get_parent()
 var deploy: Button
 var audio: Button
+var level_button: Button
 
 func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	level_button = make_button("MISSION: ASHGATE",Rect2(330,285,300,36),select_level)
 	deploy = make_button("DEPLOY TO ASHGATE",Rect2(330,339,300,44),game.start_mission)
 	make_button("FIELD ORDERS",Rect2(330,393,145,36),toggle_orders)
 	audio = make_button("AUDIO: ON",Rect2(485,393,145,36),toggle_audio)
@@ -68,13 +70,13 @@ func _draw() -> void:
 	centered("II",284,DISPLAY_FONT,54,GOLD)
 	draw_line(Vector2(310,262),Vector2(434,262),Color("796341"))
 	draw_line(Vector2(526,262),Vector2(650,262),Color("796341"))
-	centered("ASHGATE SIEGE  /  BREAK THE SIGNAL",314,BODY_FONT,17,Color("bfb7a3"))
-	centered("THREE RELAYS. ONE SIEGE WALKER. NO RETREAT.",495,BODY_FONT,14,Color("a49b86"))
+
+	centered("SECURE THE PUMPS. BREAK THE WAAAGH." if game.level == 2 else "THREE RELAYS. ONE SIEGE WALKER. NO RETREAT.",495,BODY_FONT,14,Color("a49b86"))
 	if show_orders:
 		draw_rect(Rect2(170,110,620,215),Color("10161b"))
 		draw_rect(Rect2(170,110,620,215),GOLD,false,1)
 		centered("FIELD ORDERS",151,DISPLAY_FONT,26,GOLD)
-		centered("Destroy three signal relays. Eliminate the siege walker.",191,BODY_FONT,20,Color("dfd7c4"))
+		centered("Hold three pumps for 8 seconds. Defeat the Ork Warboss." if game.level == 2 else "Destroy three signal relays. Eliminate the siege walker.",191,BODY_FONT,20,Color("dfd7c4"))
 		centered("Reach extraction. Survive the streets of Ashgate.",216,BODY_FONT,20,Color("dfd7c4"))
 		var controls := "WASD  Move     Mouse  Aim     LMB  Fire     ESC  Pause"
 		var actions := "SPACE / RMB  Frag     SHIFT  Dash"
@@ -83,3 +85,14 @@ func _draw() -> void:
 			actions = "Tap FRAG, DASH or PAUSE for tactical actions"
 		centered(controls,264,BODY_FONT,18,GOLD)
 		centered(actions,291,BODY_FONT,18,GOLD)
+
+func select_level() -> void:
+	game.level = 2 if game.level == 1 else 1
+	game.reset()
+	sync_level()
+	queue_redraw()
+
+func sync_level() -> void:
+	level_button.text = "MISSION: IRON BELLY" if game.level == 2 else "MISSION: ASHGATE"
+	deploy.text = "DEPLOY TO IRON BELLY" if game.level == 2 else "DEPLOY TO ASHGATE"
+	queue_redraw()

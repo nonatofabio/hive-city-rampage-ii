@@ -61,6 +61,8 @@ func _input(event: InputEvent) -> void:
 					voice.stop()
 			elif Rect2(240,175,480,185).has_point(event.position):
 				if game.state != "playing":
+					if game.state == "won" and game.level == 1:
+						game.level = 2
 					game.reset()
 				else:
 					game.toggle_pause()

@@ -6,6 +6,11 @@ extends Node2D
 @export var radius := 18.0
 const BREAKABLES := ["crate", "barrel", "relay"]
 const PERMANENT := ["sandbags", "barricade", "tank_trap"]
+var remains_solid := false
+var prop_texture := ""
+var secured_texture := ""
+var objective_label := "SIGNAL RELAY"
+var custom_sheet := ""
 var destroyed_at := -1.0
 var world_pos := Vector2.ZERO
 var max_hp := 45.0
@@ -40,13 +45,15 @@ func pose_key(library: PoseLibrary, time: float) -> Dictionary:
 	return library.pose(kind, stride, moving, aim_angle, recoil, time, phase, aim_view if kind == "player" else 999)
 
 func socket(library: PoseLibrary, time: float, socket_name: String) -> Vector2:
+	if not custom_sheet.is_empty():
+		return Vector2(32*facing,-90 if kind == "boss" else -55)
 	var geo := library.geometry(kind, pose_key(library, time), facing)
 	return geo[socket_name] - geo.anchor
 
 func refresh(library: PoseLibrary, time: float, aim: Vector2, illumination: float = 0.0) -> void:
 	position = Iso.project(world_pos)
-	var wreck := hp <= 0.0 and kind in BREAKABLES
-	visible = hp > 0.0 or wreck
+	var wreck := hp <= 0.0 and kind in BREAKABLES and not remains_solid
+	visible = hp > 0.0 or wreck or remains_solid
 	if not visible:
 		return
 	var prop := kind in BREAKABLES or kind in PERMANENT
@@ -58,6 +65,8 @@ func refresh(library: PoseLibrary, time: float, aim: Vector2, illumination: floa
 	if prop:
 		var asset := "res://assets/props/" if wreck or kind in PERMANENT else "res://assets/baked/"
 		body.texture = library.texture(asset + kind + ("_wreck" if wreck else "") + ".png")
+		if not prop_texture.is_empty():
+			body.texture = library.texture(secured_texture if hp<=0 else prop_texture)
 		body.position = Vector2(-58 if kind in BREAKABLES and not wreck else -body.texture.get_width()/2.0, -body.texture.get_height() + 16)
 		if wreck:
 			# Wrecks settle once, remain for the mission, and render beneath standing actors.
@@ -66,6 +75,15 @@ func refresh(library: PoseLibrary, time: float, aim: Vector2, illumination: floa
 			body.rotation = sin(settle*TAU)*0.06*(1.0-settle)
 			z_index = -1
 			shadow.visible = false
+	elif not custom_sheet.is_empty():
+		body.texture = library.texture(custom_sheet)
+		var cell := Vector2(body.texture.get_width()/4,body.texture.get_height())
+		var height := 160.0 if kind == "boss" else 100.0
+		body.region_enabled = true
+		body.region_rect = Rect2(Vector2((int(stride*4)%4 if moving else 0)*cell.x,0),cell)
+		body.scale = Vector2.ONE*height/cell.y
+		body.position = Vector2(-cell.x/2,-cell.y+10)*body.scale
+		body.flip_h = facing<0
 	else:
 		var key := pose_key(library, time)
 		var data: Dictionary = library.models[key.model]
@@ -108,4 +126,4 @@ func _draw() -> void:
 		draw_rect(Rect2(-19, y, 38, 4), Color("121419"))
 		draw_rect(Rect2(-19, y, 38 * hp / max_hp, 3), Color("ae3b28"))
 	elif kind == "relay" and hp > 0.0 and body.texture != null:
-		draw_string(ThemeDB.fallback_font,Vector2(-39,-body.texture.get_height()+14),"SIGNAL RELAY",HORIZONTAL_ALIGNMENT_LEFT,-1,11,Color("f68e46"))
+		draw_string(ThemeDB.fallback_font,Vector2(-39,-body.texture.get_height()+14),objective_label,HORIZONTAL_ALIGNMENT_LEFT,-1,11,Color("f68e46"))

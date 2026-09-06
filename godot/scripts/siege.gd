@@ -5,6 +5,11 @@ const ACTOR_SCENE := preload("res://scenes/actor.tscn")
 const EFFECT_SCENE := preload("res://scenes/effect.tscn")
 const HP := {"grunt":45.0, "rifle":35.0, "runner":24.0, "brute":125.0, "boss":1800.0}
 const SPEED := {"grunt":72.0, "rifle":58.0, "runner":132.0, "brute":48.0, "boss":38.0}
+var level := 1
+var capture_progress := [0.0,0.0,0.0]
+var hazards: Array = []
+var hazard_cooldown := 0.0
+var boss_salvo := 0.0
 var poses := PoseLibrary.new()
 var rng := RandomNumberGenerator.new()
 var player: SiegeActor
@@ -65,6 +70,7 @@ func _ready() -> void:
 	var args := OS.get_cmdline_user_args()
 	for i in range(args.size()):
 		match args[i]:
+			"--level": level = clampi(int(args[i + 1]),1,2)
 			"--seed": seed_value = int(args[i + 1])
 			"--smoke-test": smoke_frames = int(args[i + 1])
 			"--screenshot": screenshot_path = args[i + 1]
@@ -89,6 +95,7 @@ func show_title() -> void:
 	touch_controls.hide()
 	touch_controls.clear_touches()
 	title_screen.show()
+	title_screen.sync_level()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 func start_mission() -> void:
@@ -110,6 +117,9 @@ func _install_inputs() -> void:
 			InputMap.action_add_event(action, event)
 
 func reset() -> void:
+	capture_progress = [0.0,0.0,0.0]
+	hazard_cooldown = 0.0
+	boss_salvo = 0.0
 	touch_controls.clear_touches()
 	for child in actors.get_children():
 		actors.remove_child(child)
@@ -144,7 +154,10 @@ func reset() -> void:
 	shake = 0.0
 	message = "ASHGATE // BREAK THE SIGNAL"
 	message_timer = 4.0
-	var mission: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://assets/data/mission.json"))
+	var mission: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://assets/data/mission_2.json" if level == 2 else "res://assets/data/mission.json"))
+	hazards = mission.get("hazards",[])
+	if level == 2:
+		message = "IRON BELLY // SECURE THE THREE PUMPS"
 	extraction = Iso.vec(mission.extraction)
 	player = make_actor(mission.player)
 	for data: Dictionary in mission.cover:
@@ -176,6 +189,13 @@ func reset() -> void:
 func make_actor(data: Dictionary) -> SiegeActor:
 	var actor: SiegeActor = ACTOR_SCENE.instantiate()
 	actor.configure(data)
+	if level == 2 and data.kind == "relay":
+		actor.prop_texture = "res://assets/industry/pump.png"
+		actor.secured_texture = "res://assets/industry/pump_secured.png"
+		actor.objective_label = "PURGE PUMP"
+		actor.remains_solid = true
+	if level == 2 and data.kind in ["grunt","runner","rifle","brute","boss"]:
+		actor.custom_sheet = "res://assets/orks/" + ("warboss" if data.kind == "boss" else "shoota" if data.kind in ["rifle","brute"] else "boy") + ".png"
 	actors.add_child(actor)
 	return actor
 
@@ -201,7 +221,7 @@ func move_actor(actor: SiegeActor, delta: Vector2) -> float:
 		actor.world_pos.x = clampf(actor.world_pos.x,35,2365)
 		actor.world_pos.y = clampf(actor.world_pos.y,85,645)
 		for obstacle: SiegeActor in cover + relays:
-			if obstacle.hp > 0.0 and actor.world_pos.distance_squared_to(obstacle.world_pos) < pow(actor.radius + obstacle.radius,2):
+			if (obstacle.hp > 0.0 or obstacle.remains_solid) and actor.world_pos.distance_squared_to(obstacle.world_pos) < pow(actor.radius + obstacle.radius,2):
 				actor.world_pos[axis] = old
 				break
 	var displacement := actor.world_pos - start
@@ -231,6 +251,8 @@ func damage_player(amount: float) -> void:
 		state = "dead"
 
 func hit(target: SiegeActor, damage: float) -> void:
+	if level == 2 and target in relays:
+		return
 	if target.kind in SiegeActor.PERMANENT:
 		burst(target.world_pos,3,Color("b9b09b"),65)
 		return
@@ -257,13 +279,14 @@ func hit(target: SiegeActor, damage: float) -> void:
 		var death := add_effect("death",target.world_pos)
 		death.actor_kind = target.kind
 		death.facing = target.facing
+		death.custom_sheet = target.custom_sheet
 		combo = combo + 1 if combo_timer > 0.0 else 1
 		combo_timer = 2.4
 		score += (5000 if target.kind == "boss" else 100) * mini(5,combo)
 		kills += 1
 		if target.kind == "boss":
 			boss_defeated = true
-			message = "SIEGE WALKER DESTROYED // REACH EXTRACTION"
+			message = "WARBOSS DEFEATED // REACH EXTRACTION" if level == 2 else "SIEGE WALKER DESTROYED // REACH EXTRACTION"
 			message_timer = 5.0
 			explode(target.world_pos,210,200)
 		elif rng.randf() < 0.25:
@@ -324,7 +347,7 @@ func fire_weapon(actor: SiegeActor, target: Vector2, speed: float, damage: float
 	var offset := actor.socket(poses,time,"muzzle")
 	var start := actor.world_pos + Iso.unproject(offset + Vector2(0,55))
 	for obstacle: SiegeActor in cover + relays:
-		if obstacle.hp > 0.0 and Iso.segment_entry(actor.world_pos,start,obstacle.world_pos,obstacle.radius) >= 0.0:
+		if (obstacle.hp > 0.0 or obstacle.remains_solid) and Iso.segment_entry(actor.world_pos,start,obstacle.world_pos,obstacle.radius) >= 0.0:
 			start = actor.world_pos
 			break
 	shots.append({"pos":start,"velocity":Iso.unit(target-start)*speed,"damage":damage,"enemy":enemy,"life":2.0 if enemy else 1.1})
@@ -348,6 +371,8 @@ func tick(dt: float, movement: Vector2, target: Vector2, shooting: bool, dash: b
 	if state != "playing" or paused:
 		return
 	time += dt
+	if level == 2:
+		update_level_two(dt)
 	aim = target
 	for property: String in ["hurt_timer","grenade_cd","dash_cd","dash_time","combo_timer","message_timer"]:
 		set(property,maxf(0.0,float(get(property)) - dt))
@@ -383,7 +408,7 @@ func tick(dt: float, movement: Vector2, target: Vector2, shooting: bool, dash: b
 	if relays_down() == 3 and not boss_spawned:
 		boss_spawned = true
 		spawn(Vector2(2180,370),"boss")
-		message = "WARNING // SIEGE WALKER INBOUND"
+		message = "WARNING // ORK WARBOSS INBOUND" if level == 2 else "WARNING // SIEGE WALKER INBOUND"
 		message_timer = 5.0
 	update_enemies(dt)
 	update_shots(dt)
@@ -437,7 +462,7 @@ func update_enemies(dt: float) -> void:
 		for obstacle: SiegeActor in cover + relays:
 			var away := enemy.world_pos - obstacle.world_pos
 			var d := away.length()
-			if obstacle.hp > 0.0 and d > 0.0 and d < obstacle.radius + enemy.radius + 60:
+			if (obstacle.hp > 0.0 or obstacle.remains_solid) and d > 0.0 and d < obstacle.radius + enemy.radius + 60:
 				var tangent := Vector2(-away.y,away.x)
 				if tangent.dot(delta) < 0.0:
 					tangent = -tangent
@@ -461,7 +486,7 @@ func update_shots(dt: float) -> void:
 		var nearest := INF
 		var contact: SiegeActor = null
 		for target: SiegeActor in targets:
-			if target.hp <= 0.0:
+			if target.hp <= 0.0 and not target.remains_solid:
 				continue
 			var fraction := Iso.segment_entry(old,shot.pos,target.world_pos,target.radius)
 			if fraction >= 0.0 and fraction < nearest:
@@ -593,6 +618,10 @@ func _unhandled_input(event: InputEvent) -> void:
 					get_tree().quit()
 				else:
 					toggle_pause()
+			KEY_N:
+				if state == "won" and level == 1:
+					level = 2
+					reset()
 			KEY_R:
 				if state != "playing":
 					reset()
@@ -623,3 +652,34 @@ func _notification(what: int) -> void:
 		touch_controls.clear_touches()
 		for voice in audio_voices:
 			voice.stream_paused = true
+
+func update_level_two(dt: float) -> void:
+	hazard_cooldown = maxf(0,hazard_cooldown-dt)
+	for i in relays.size():
+		var pump := relays[i]
+		if pump.hp <= 0:
+			continue
+		var nearby := player.world_pos.distance_to(pump.world_pos)<120
+		var contested := enemies.any(func(e): return e.hp>0 and e.world_pos.distance_to(pump.world_pos)<90)
+		if nearby:
+			message = "PUMP %d // %s" % [i+1,"CLEAR NEARBY ORKS" if contested else "SECURING %d%%" % int(capture_progress[i]/8.0*100)]
+			message_timer = 0.2
+			if not contested:
+				capture_progress[i] += dt
+				if capture_progress[i]>=8.0:
+					pump.hp = 0
+					pump.destroyed_at = time
+					score += 750
+					grenades = mini(9,grenades+2)
+	if fmod(time,5.0)<2.0 and hazard_cooldown<=0:
+		for hazard in hazards:
+			if player.world_pos.distance_to(Iso.vec(hazard))<75:
+				damage_player(10)
+				hazard_cooldown = 1.0
+	boss_salvo -= dt
+	if boss_spawned and not boss_defeated and boss_salvo<=0:
+		for enemy in enemies:
+			if enemy.kind == "boss" and enemy.hp>0:
+				for offset in [-80,0,80]:
+					fire_weapon(enemy,player.world_pos+Vector2(0,offset),280,12,true)
+		boss_salvo = 3.5

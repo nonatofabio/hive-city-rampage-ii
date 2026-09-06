@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/siege.gd" id="1"]
 [ext_resource type="Texture2D" path="res://assets/baked/floor.png" id="2"]
@@ -7,6 +7,8 @@
 [ext_resource type="Script" path="res://scripts/touch_controls.gd" id="5"]
 
 [ext_resource type="Script" path="res://scripts/title_screen.gd" id="6"]
+
+[ext_resource type="Script" path="res://scripts/level_decor.gd" id="7"]
 
 [node name="HiveCityRampageII" type="Node2D"]
 texture_filter = 1
@@ -19,6 +21,10 @@ z_index = -10
 position = Vector2(-700, 0)
 texture = ExtResource("2")
 centered = false
+
+[node name="LevelDecor" type="Node2D" parent="World"]
+z_index = -4
+script = ExtResource("7")
 
 [node name="Ground" type="Node2D" parent="World"]
 z_index = -3

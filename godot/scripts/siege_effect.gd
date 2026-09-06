@@ -1,5 +1,6 @@
 class_name SiegeEffect
 extends Node2D
+var custom_sheet := ""
 var effect_kind := "fire"
 var actor_kind := "grunt"
 var age := 0.0
@@ -18,6 +19,19 @@ func refresh(library: PoseLibrary, dt: float) -> void:
 		light.texture = library.texture("res://assets/baked/blast_light.png")
 		light.scale = Vector2.ONE * radius / 160.0
 		light.self_modulate = Color(1,1,1,maxf(0,1-age/0.35))
+	if effect_kind == "death" and not custom_sheet.is_empty():
+		if age>=20:
+			queue_free()
+			return
+		sprite.texture = library.texture(custom_sheet)
+		var cell := Vector2(sprite.texture.get_width()/4,sprite.texture.get_height())
+		sprite.region_rect = Rect2(Vector2.ZERO,cell)
+		sprite.scale = Vector2(100.0/cell.y,100.0/cell.y*lerpf(1.0,0.45,clampf(age/0.5,0,1)))
+		sprite.position = -cell*Vector2(0.5,0.85)*sprite.scale
+		sprite.rotation = lerpf(0.0,0.45,clampf(age/0.5,0,1))
+		sprite.modulate = Color(0.5,0.5,0.5,clampf((20-age)/2,0,1))
+		z_index = -1
+		return
 	var name_key := effect_kind
 	var count := 8
 	var index := 0

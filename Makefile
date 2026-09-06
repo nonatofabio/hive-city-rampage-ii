@@ -47,3 +47,10 @@ record: import
 	@"$(FFMPEG)" -y -loglevel error -i build/media/gameplay.avi -t 14 -c:v libx264 -crf 26 -pix_fmt yuv420p -c:a aac -b:a 128k -movflags +faststart static/gameplay.mp4
 	@"$(FFMPEG)" -y -loglevel error -ss 1 -t 8 -i static/gameplay.mp4 -filter_complex "[0:v]fps=10,scale=384:-1:flags=lanczos,split[a][b];[a]palettegen=stats_mode=diff:max_colors=64[p];[b][p]paletteuse=dither=none" -loop 0 static/gameplay.gif
 	@rm -f build/media/gameplay.avi
+
+.PHONY: record-level-two
+record-level-two: import
+	@mkdir -p build/media
+	@"$(GODOT_BIN)" --path godot --fixed-fps 30 --write-movie "$(CURDIR)/build/media/iron-belly.avi" --script res://tests/record_level_two.gd -- --validation
+	@"$(FFMPEG)" -y -loglevel error -i build/media/iron-belly.avi -t 16 -c:v libx264 -crf 26 -pix_fmt yuv420p -c:a aac -movflags +faststart static/iron-belly.mp4
+	@rm -f build/media/iron-belly.avi

@@ -1,0 +1,263 @@
+{
+  "player": {
+    "position": [
+      220,
+      350
+    ],
+    "kind": "player",
+    "hp": 100,
+    "radius": 16
+  },
+  "cover": [
+    {
+      "kind": "sandbags",
+      "position": [
+        440,
+        160
+      ],
+      "hp": 1000,
+      "radius": 30
+    },
+    {
+      "kind": "sandbags",
+      "position": [
+        500,
+        205
+      ],
+      "hp": 1000,
+      "radius": 30
+    },
+    {
+      "kind": "barricade",
+      "position": [
+        550,
+        560
+      ],
+      "hp": 1000,
+      "radius": 30
+    },
+    {
+      "kind": "crate",
+      "position": [
+        600,
+        530
+      ],
+      "hp": 65,
+      "radius": 30
+    },
+    {
+      "kind": "barrel",
+      "position": [
+        720,
+        170
+      ],
+      "hp": 28,
+      "radius": 30
+    },
+    {
+      "kind": "tank_trap",
+      "position": [
+        1000,
+        190
+      ],
+      "hp": 1000,
+      "radius": 30
+    },
+    {
+      "kind": "crate",
+      "position": [
+        1130,
+        400
+      ],
+      "hp": 65,
+      "radius": 30
+    },
+    {
+      "kind": "barricade",
+      "position": [
+        1210,
+        440
+      ],
+      "hp": 1000,
+      "radius": 30
+    },
+    {
+      "kind": "sandbags",
+      "position": [
+        1450,
+        550
+      ],
+      "hp": 1000,
+      "radius": 30
+    },
+    {
+      "kind": "sandbags",
+      "position": [
+        1500,
+        580
+      ],
+      "hp": 1000,
+      "radius": 30
+    },
+    {
+      "kind": "barrel",
+      "position": [
+        1680,
+        260
+      ],
+      "hp": 28,
+      "radius": 30
+    },
+    {
+      "kind": "crate",
+      "position": [
+        1810,
+        170
+      ],
+      "hp": 65,
+      "radius": 30
+    },
+    {
+      "kind": "tank_trap",
+      "position": [
+        1890,
+        560
+      ],
+      "hp": 1000,
+      "radius": 30
+    },
+    {
+      "kind": "barricade",
+      "position": [
+        2150,
+        180
+      ],
+      "hp": 1000,
+      "radius": 30
+    }
+  ],
+  "relays": [
+    {
+      "kind": "relay",
+      "position": [
+        680,
+        310
+      ],
+      "hp": 250,
+      "radius": 30
+    },
+    {
+      "kind": "relay",
+      "position": [
+        1270,
+        190
+      ],
+      "hp": 250,
+      "radius": 30
+    },
+    {
+      "kind": "relay",
+      "position": [
+        1800,
+        460
+      ],
+      "hp": 250,
+      "radius": 30
+    }
+  ],
+  "enemies": [
+    {
+      "kind": "grunt",
+      "position": [
+        640,
+        370
+      ]
+    },
+    {
+      "kind": "runner",
+      "position": [
+        720,
+        450
+      ]
+    },
+    {
+      "kind": "rifle",
+      "position": [
+        850,
+        200
+      ]
+    },
+    {
+      "kind": "brute",
+      "position": [
+        1180,
+        320
+      ]
+    },
+    {
+      "kind": "grunt",
+      "position": [
+        1330,
+        250
+      ]
+    },
+    {
+      "kind": "rifle",
+      "position": [
+        1500,
+        390
+      ]
+    },
+    {
+      "kind": "grunt",
+      "position": [
+        1790,
+        250
+      ]
+    },
+    {
+      "kind": "brute",
+      "position": [
+        1970,
+        370
+      ]
+    }
+  ],
+  "fires": [
+    [
+      520,
+      620
+    ],
+    [
+      1080,
+      620
+    ],
+    [
+      1670,
+      90
+    ]
+  ],
+  "extraction": [
+    2280,
+    470
+  ],
+  "world_size": [
+    2400,
+    700
+  ],
+  "facades": [],
+  "hazards": [
+    [
+      900,
+      380
+    ],
+    [
+      1490,
+      260
+    ],
+    [
+      2020,
+      430
+    ]
+  ]
+}

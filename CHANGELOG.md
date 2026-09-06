@@ -1,6 +1,11 @@
 # Changelog
 
-## Unreleased
+## 0.3.0-alpha.1
+
+- Iron Belly: three contested pump objectives, cycling heat vents, and Ork Warboss.
+- Ork Boy, Shoota, and Warboss sprites with persistent fallen enemies.
+- Mission selection and campaign advancement on desktop and touch.
+- Factory machinery assets, level-two tests, and repeatable gameplay recording.
 
 - Persistent wrecks for destroyed crates, barrels, and signal relays.
 - Eight permanent cover placements: sandbags, concrete barriers, and steel tank traps.
