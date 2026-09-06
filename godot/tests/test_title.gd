@@ -31,7 +31,6 @@ func run() -> void:
 	var motion := InputEventMouseMotion.new()
 	motion.position = Vector2(480,360)
 	root.push_input(motion,true)
-	await process_frame
 	for pressed in [true,false]:
 		var event := InputEventMouseButton.new()
 		event.position = Vector2(480,360)
@@ -39,7 +38,7 @@ func run() -> void:
 		event.pressed = pressed
 		event.button_mask = MOUSE_BUTTON_MASK_LEFT if pressed else 0
 		root.push_input(event,true)
-		await process_frame
+	await process_frame
 	check(not game.at_title and game.hud.visible,"Deploy mouse button starts mission")
 	check(game.grenades == 5 and game.time == 0.0,"Menu input must not consume grenades or advance mission")
 	game.show_title()
@@ -50,7 +49,8 @@ func run() -> void:
 		event.position = Vector2(480,360)
 		event.pressed = pressed
 		Input.parse_input_event(event)
-		await process_frame
+		Input.flush_buffered_events()
+	await process_frame
 	check(not game.at_title,"Touch deploy starts mission")
 	game.toggle_pause()
 	check(game.paused,"Pause works after title deployment")

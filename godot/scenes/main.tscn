@@ -8,7 +8,7 @@
 
 [ext_resource type="Script" path="res://scripts/title_screen.gd" id="6"]
 
-[node name="HyveCityRampageII" type="Node2D"]
+[node name="HiveCityRampageII" type="Node2D"]
 texture_filter = 1
 script = ExtResource("1")
 

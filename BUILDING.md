@@ -1,7 +1,7 @@
 # Build and run with Make
 
 Run `make help` for the available targets. Commands are run from the repository
-root, or from elsewhere with `make -C /path/to/hyve-city-rampage-ii <target>`.
+root, or from elsewhere with `make -C /path/to/hive-city-rampage-ii <target>`.
 
 ## Toolchain
 
@@ -54,5 +54,5 @@ logs, and `manifest.json` containing SHA-256 hashes and the source commit.
 The builder preserves existing artifacts and fails on import/export/signature errors.
 
 The app uses ad-hoc signing and the APK uses a local debug key. The Android package
-is `com.nonatofabio.hyvecityrampageii`; macOS is not notarized. These are preview
+is `com.nonatofabio.hivecityrampageii`; macOS is not notarized. These are preview
 packages, not store submissions. `make build` does not publish a release.

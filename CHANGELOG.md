@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## 0.2.1-alpha.1
+
+- Correct the title, repository name, platform identifiers, and packages to Hive City Rampage II.
 
 - Use Make for launch, editor, validation, captures, cleanup, and platform builds.
 - Remove predecessor engines, duplicate assets, obsolete tooling, and historical previews.
@@ -9,7 +11,7 @@
 
 ## 0.2.0-alpha.1 — First sequel preview
 
-- Hyve City Rampage II branding and native title screen.
+- Hive City Rampage II branding and native title screen.
 - Deployment, field orders, and audio controls with mouse and touch support.
 - Cinzel title lettering and Rajdhani combat UI.
 - Ashgate Siege mission with the final layered torso and silhouette handoff.

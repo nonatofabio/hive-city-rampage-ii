@@ -1,4 +1,4 @@
-# Hyve City Rampage II — development and release entry points.
+# Hive City Rampage II — development and release entry points.
 .DEFAULT_GOAL := help
 .NOTPARALLEL:
 

@@ -63,7 +63,7 @@ func _draw() -> void:
 	draw_line(Vector2(523,84),Vector2(720,84),GOLD)
 	var skull := preload("res://assets/effects/servo_skull.png")
 	draw_texture_rect(skull,Rect2(466,65,28,45),false,Color("dbc89d"))
-	centered("HYVE CITY",160,DISPLAY_FONT,49,GOLD)
+	centered("HIVE CITY",160,DISPLAY_FONT,49,GOLD)
 	centered("RAMPAGE",228,DISPLAY_FONT,68,Color("f0dfb7"))
 	centered("II",284,DISPLAY_FONT,54,GOLD)
 	draw_line(Vector2(310,262),Vector2(434,262),Color("796341"))

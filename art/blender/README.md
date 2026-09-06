@@ -1,6 +1,6 @@
 # Editable Blender sources
 
-These source projects and textures belong to the assets used in Hyve City Rampage II.
+These source projects and textures belong to the assets used in Hive City Rampage II.
 Open the `.blend` files directly in Blender for inspection or editing. They are not
 loaded at runtime and are not needed to build the game.
 

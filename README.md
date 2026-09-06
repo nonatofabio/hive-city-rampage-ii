@@ -1,14 +1,14 @@
-# Hyve City Rampage II
+# Hive City Rampage II
 
 A gothic isometric shooter by **nonatofabio**, built in **Godot 4**.
 Deploy into Ashgate, destroy three signal relays, bring down the siege walker,
 and fight your way to extraction.
 
-![Hyve City Rampage II title screen](static/hyve-title.png)
+![Hive City Rampage II title screen](static/hive-title.png)
 
 ## Play and develop
 
-Download macOS and Android previews from [Releases](https://github.com/nonatofabio/hyve-city-rampage-ii/releases).
+Download macOS and Android previews from [Releases](https://github.com/nonatofabio/hive-city-rampage-ii/releases).
 The previews use local test signing: macOS is not notarized; Android uses a debug key.
 
 From source, install Godot 4.3, Make, and Python 3 (standard library only):

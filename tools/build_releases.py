@@ -34,8 +34,8 @@ def main():
     version = json.loads(presets['preset.0.options']['application/version'])
     if json.loads(presets['preset.1.options']['version/name']) != version:
         raise SystemExit('macOS and Android versions must match in export_presets.cfg.')
-    app = BUILD / 'macos/Hyve City Rampage II.app'
-    apk = BUILD / f'android/Hyve-City-Rampage-II-{version}.apk'
+    app = BUILD / 'macos/Hive City Rampage II.app'
+    apk = BUILD / f'android/Hive-City-Rampage-II-{version}.apk'
     (BUILD/'logs').mkdir(parents=True,exist_ok=True)
     # Import new assets and register script classes on a fresh checkout before exporting.
     import_log = BUILD/'logs/import.log'
@@ -63,7 +63,7 @@ def main():
     metadata = plistlib.loads((app/'Contents/Info.plist').read_bytes())
     binary = app/'Contents/MacOS'/metadata['CFBundleExecutable']
     print(subprocess.check_output(['file',str(binary)],text=True),flush=True)
-    archive = BUILD/f'Hyve-City-Rampage-II-{version}-macOS.zip'
+    archive = BUILD/f'Hive-City-Rampage-II-{version}-macOS.zip'
     subprocess.run(['ditto','-c','-k','--sequesterRsrc','--keepParent',str(app),str(archive)],check=True)
     manifest = {'version':version,'engine':subprocess.check_output([engine,'--version'],text=True).strip(),'art_source_commit':'b9828a619a8e61b036e05c676d055580787e9dfb',
                 'source_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
