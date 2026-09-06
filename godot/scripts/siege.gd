@@ -231,6 +231,9 @@ func damage_player(amount: float) -> void:
 		state = "dead"
 
 func hit(target: SiegeActor, damage: float) -> void:
+	if target.kind in SiegeActor.PERMANENT:
+		burst(target.world_pos,3,Color("b9b09b"),65)
+		return
 	if target.hp <= 0.0:
 		return
 	target.hp -= damage
@@ -238,7 +241,8 @@ func hit(target: SiegeActor, damage: float) -> void:
 	burst(target.world_pos, 5, Color("da9e58"), 90)
 	if target.hp > 0.0:
 		return
-	if target.kind in ["crate", "barrel", "relay"]:
+	if target.kind in SiegeActor.BREAKABLES:
+		target.destroyed_at = time
 		marks.append(target.world_pos)
 	if target.kind == "barrel":
 		explode(target.world_pos,155,140)

@@ -33,6 +33,8 @@ settings before the first Android build. Install matching export templates throu
 | `make test` | Import and run all native regression checks |
 | `make build` | Import, export both platforms, verify signatures, ZIP, hash |
 | `make capture` | Render review screenshots into `godot/artifacts/` |
+| `make record` | Record 14-second MP4 with audio and 8-second GIF; requires ffmpeg |
+| `make import-props` | Repack the generated prop atlas into runtime sprites |
 | `make clean` | Remove `build/`, `godot/artifacts/`, and `godot/.godot/` |
 
 Pass engine flags with `GODOT_ARGS` and game flags with `GAME_ARGS`:
@@ -56,3 +58,8 @@ The builder preserves existing artifacts and fails on import/export/signature er
 The app uses ad-hoc signing and the APK uses a local debug key. The Android package
 is `com.nonatofabio.hivecityrampageii`; macOS is not notarized. These are preview
 packages, not store submissions. `make build` does not publish a release.
+
+`make record` drives real mission input at 60 simulation steps per second, recorded
+at 30 FPS with Godot Movie Maker. It applies no scripted damage or invulnerability.
+The MP4 is 960 × 540; the lightweight GIF is 384 × 216 at 10 FPS. Outputs are in
+`static/`; the temporary AVI is removed after successful conversion.

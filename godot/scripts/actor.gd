@@ -1,9 +1,12 @@
 class_name SiegeActor
 extends Node2D
 ## Reusable actor scene. World-space simulation and projected visuals are separate.
-@export_enum("player", "grunt", "rifle", "runner", "brute", "boss", "crate", "barrel", "relay") var kind := "grunt"
+@export_enum("player", "grunt", "rifle", "runner", "brute", "boss", "crate", "barrel", "relay", "sandbags", "barricade", "tank_trap") var kind := "grunt"
 @export var hp := 45.0
 @export var radius := 18.0
+const BREAKABLES := ["crate", "barrel", "relay"]
+const PERMANENT := ["sandbags", "barricade", "tank_trap"]
+var destroyed_at := -1.0
 var world_pos := Vector2.ZERO
 var max_hp := 45.0
 var cooldown := 0.0
@@ -42,18 +45,27 @@ func socket(library: PoseLibrary, time: float, socket_name: String) -> Vector2:
 
 func refresh(library: PoseLibrary, time: float, aim: Vector2, illumination: float = 0.0) -> void:
 	position = Iso.project(world_pos)
-	visible = hp > 0.0
+	var wreck := hp <= 0.0 and kind in BREAKABLES
+	visible = hp > 0.0 or wreck
 	if not visible:
 		return
-	var prop := kind in ["crate", "barrel", "relay"]
+	var prop := kind in BREAKABLES or kind in PERMANENT
 	var shadow_kind := "prop" if prop else ("boss" if kind == "boss" else "actor")
 	shadow.texture = library.texture("res://assets/baked/shadow_" + shadow_kind + ".png")
 	shadow.position = Vector2(0, 6 if prop else 2)
 	lower.visible = false
 	muzzle_flash.visible = false
 	if prop:
-		body.texture = library.texture("res://assets/baked/" + kind + ".png")
-		body.position = Vector2(-58, -body.texture.get_height() + 16)
+		var asset := "res://assets/props/" if wreck or kind in PERMANENT else "res://assets/baked/"
+		body.texture = library.texture(asset + kind + ("_wreck" if wreck else "") + ".png")
+		body.position = Vector2(-58 if kind in BREAKABLES and not wreck else -body.texture.get_width()/2.0, -body.texture.get_height() + 16)
+		if wreck:
+			# Wrecks settle once, remain for the mission, and render beneath standing actors.
+			var settle := clampf((time-destroyed_at)/0.45,0.0,1.0)
+			body.position.y -= sin(settle*PI)*12.0
+			body.rotation = sin(settle*TAU)*0.06*(1.0-settle)
+			z_index = -1
+			shadow.visible = false
 	else:
 		var key := pose_key(library, time)
 		var data: Dictionary = library.models[key.model]

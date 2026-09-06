@@ -6,6 +6,14 @@ and fight your way to extraction.
 
 ![Hive City Rampage II title screen](static/hive-title.png)
 
+## Gameplay
+
+![Gameplay preview](static/gameplay.gif)
+
+[Watch the 14-second gameplay movie with audio](static/gameplay.mp4).
+Crates, barrels, and relays leave persistent wreckage. Sandbags, concrete barriers,
+and steel tank traps provide indestructible cover.
+
 ## Play and develop
 
 Download macOS and Android previews from [Releases](https://github.com/nonatofabio/hive-city-rampage-ii/releases).
@@ -19,6 +27,7 @@ make editor    # Open the Godot editor
 make test      # Menu, touch, combat, and silhouette checks
 make build     # macOS + Android packages; requires the export toolchain
 make capture   # Title, mission, and animation review images
+make record    # Gameplay MP4 and small GIF; requires ffmpeg
 make clean     # Delete generated builds and Godot caches
 ```
 

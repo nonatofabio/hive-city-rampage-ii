@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Persistent wrecks for destroyed crates, barrels, and signal relays.
+- Eight permanent cover placements: sandbags, concrete barriers, and steel tank traps.
+- Cover regression tests and repeatable gameplay GIF/video capture with `make record`.
+
 ## 0.2.1-alpha.1
 
 - Correct the title, repository name, platform identifiers, and packages to Hive City Rampage II.

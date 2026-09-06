@@ -16,6 +16,7 @@ def main():
     tasks = [
         (['--editor', '--import'], None),
         (['--script', 'res://tests/test_title.gd', '--', '--validation', '--touch', '--mute'], 'TITLE PASS:'),
+        (['--script', 'res://tests/test_cover.gd', '--', '--validation', '--mute'], 'COVER PASS:'),
         (['--script', 'res://tests/run_tests.gd', '--', '--validation', '--mute'], 'TEST PASS:'),
         (['--script', 'res://tests/audit_seams.gd'], 'SEAM PASS:'),
         (['--script', 'res://tests/test_touch.gd', '--', '--validation', '--touch', '--mute'], 'TOUCH PASS:'),
