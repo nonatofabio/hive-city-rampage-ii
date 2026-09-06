@@ -1,0 +1,16 @@
+{
+  "license": "CC0-1.0",
+  "sources": {
+    "kenney_scifi": "https://kenney.nl/media/pages/assets/sci-fi-sounds/6b296f9ecf-1677589334/kenney_sci-fi-sounds.zip",
+    "kenney_impact": "https://kenney.nl/media/pages/assets/impact-sounds/87b4ddecda-1677589768/kenney_impact-sounds.zip"
+  },
+  "files": {
+    "bolter_0.wav": "702ea3622d4f163c006986368f1fd1f844278589acb4796d1d93c928e7e4c854",
+    "bolter_1.wav": "885b3c792a4553d95a69028b76bd6a9efefdb707f297b99834a47d793edafcfd",
+    "bolter_2.wav": "cd49be3e41682c6d15195a0c326b06ccbd705801e98420ad5868191f90de3b61",
+    "bolter_3.wav": "d9922a5521356c77988d03446c6532451f2fd6c9f8652b30e82d5c823f85b716",
+    "source/explosionCrunch_000.ogg": "4b597d658d0ae101f0a030fbeea5fc3a4292ab85f017470a8254a8e7959cbd69",
+    "source/impactMetal_heavy_000.ogg": "e07045693e4a2b3d165c424e3dab4c781d9ff8880a386880ac89a51315d7f831",
+    "source/impactMetal_light_001.ogg": "fba69c467ddd85da7b1d82e259f936b876d9ba6a3d6f1b24bdd10468e46bfe08"
+  }
+}

@@ -1,0 +1,128 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # Trigger on version tags like v0.1.0, v1.0.0, etc.
+  workflow_dispatch:  # Allow manual trigger from GitHub UI
+
+jobs:
+  build:
+    name: Build ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact_name: HiveCityRampage-Linux
+            asset_extension: .tar.gz
+          - os: windows-latest
+            artifact_name: HiveCityRampage-Windows
+            asset_extension: .zip
+          - os: macos-latest
+            artifact_name: HiveCityRampage-macOS
+            asset_extension: .zip
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'  # Using 3.11 for better compatibility across platforms
+
+    - name: Install dependencies (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y python3-dev libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install "pygame>=2.6.0" "pyinstaller>=6.0.0"
+
+    - name: Build with PyInstaller
+      run: |
+        pyinstaller hive_city_rampage.spec
+
+    - name: Package Linux build
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        cd dist
+        tar -czf ${{ matrix.artifact_name }}${{ matrix.asset_extension }} HiveCityRampage
+        cd ..
+
+    - name: Package Windows build
+      if: matrix.os == 'windows-latest'
+      shell: pwsh
+      run: |
+        cd dist
+        Compress-Archive -Path HiveCityRampage.exe -DestinationPath ${{ matrix.artifact_name }}${{ matrix.asset_extension }}
+        cd ..
+
+    - name: Package macOS build
+      if: matrix.os == 'macos-latest'
+      run: |
+        cd dist
+        zip -r ${{ matrix.artifact_name }}${{ matrix.asset_extension }} HiveCityRampage.app
+        cd ..
+
+    - name: Upload build artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.artifact_name }}
+        path: dist/${{ matrix.artifact_name }}${{ matrix.asset_extension }}
+        retention-days: 7
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+
+    steps:
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+
+    - name: Display structure
+      run: ls -R artifacts
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          artifacts/HiveCityRampage-Linux/*.tar.gz
+          artifacts/HiveCityRampage-Windows/*.zip
+          artifacts/HiveCityRampage-macOS/*.zip
+        draft: false
+        prerelease: true
+        generate_release_notes: true
+        body: |
+          ## Hive City Rampage Alpha Build
+
+          Download the appropriate version for your platform:
+          - **Windows**: HiveCityRampage-Windows.zip
+          - **macOS**: HiveCityRampage-macOS.zip (Apple Silicon & Intel)
+          - **Linux**: HiveCityRampage-Linux.tar.gz
+
+          ### Installation
+          1. Download and extract the archive for your platform
+          2. Run the executable:
+             - Windows: Double-click `HiveCityRampage.exe`
+             - macOS: Double-click `HiveCityRampage.app` (may need to right-click → Open first time)
+             - Linux: `./HiveCityRampage` (may need `chmod +x HiveCityRampage` first)
+
+          ### Controls
+          - **WASD** - Move
+          - **Mouse** - Aim
+          - **Left Click** - Fire
+          - **Space** - Grenade
+          - **ESC** - Pause
+
+          Report bugs and feedback at: https://github.com/${{ github.repository }}/issues
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

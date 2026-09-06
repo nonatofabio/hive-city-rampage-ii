@@ -1,0 +1,31 @@
+{
+  "corners": [
+    "corner_outer_tl",
+    "corner_outer_tr",
+    "corner_outer_bl",
+    "corner_outer_br",
+    "corner_inner_tl",
+    "corner_inner_tr",
+    "corner_inner_bl",
+    "corner_inner_br"
+  ],
+  "hazards": [
+    "toxic",
+    "electric",
+    "heat"
+  ],
+  "animations": {
+    "flickering_light": 4,
+    "steam_vent": 6,
+    "electrical_panel": 8
+  },
+  "decals": [
+    "blood_pool",
+    "shell_casing",
+    "debris",
+    "oil_spill",
+    "scorch_mark",
+    "corpse"
+  ],
+  "tile_size": 32
+}

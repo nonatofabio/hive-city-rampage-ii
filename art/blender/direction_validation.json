@@ -1,0 +1,44 @@
+{
+  "player_n ORIGINAL SPRITE": {
+    "vertices": 1870,
+    "connected_components": 1,
+    "bones": 12,
+    "blended_vertices": 927
+  },
+  "player_ne ORIGINAL SPRITE": {
+    "vertices": 2448,
+    "connected_components": 1,
+    "bones": 12,
+    "blended_vertices": 1187
+  },
+  "player_s ORIGINAL SPRITE": {
+    "vertices": 1581,
+    "connected_components": 1,
+    "bones": 12,
+    "blended_vertices": 753
+  },
+  "player_se ORIGINAL SPRITE": {
+    "vertices": 2091,
+    "connected_components": 1,
+    "bones": 12,
+    "blended_vertices": 960
+  },
+  "actions": [
+    "player_n/fire",
+    "player_n/idle",
+    "player_n/walk",
+    "player_n/walk_fire",
+    "player_ne/fire",
+    "player_ne/idle",
+    "player_ne/walk",
+    "player_ne/walk_fire",
+    "player_s/fire",
+    "player_s/idle",
+    "player_s/walk",
+    "player_s/walk_fire",
+    "player_se/fire",
+    "player_se/idle",
+    "player_se/walk",
+    "player_se/walk_fire"
+  ]
+}

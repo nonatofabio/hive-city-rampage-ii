@@ -1,0 +1,16 @@
+{
+  "belt_overlap": {
+    "player": 8,
+    "player_ne": 6,
+    "player_n": 4,
+    "player_se": 8,
+    "player_s": 7
+  },
+  "ground_shift": {
+    "player": -4,
+    "player_ne": -5,
+    "player_n": 1,
+    "player_se": -3,
+    "player_s": 1
+  }
+}

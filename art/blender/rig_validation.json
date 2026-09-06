@@ -1,0 +1,67 @@
+{
+  "boss ORIGINAL SPRITE": {
+    "vertices": 12120,
+    "connected_components": 1,
+    "bones": 12,
+    "blended_vertices": 7012
+  },
+  "grunt ORIGINAL SPRITE": {
+    "vertices": 1932,
+    "connected_components": 1,
+    "bones": 12,
+    "blended_vertices": 1019
+  },
+  "player ORIGINAL SPRITE": {
+    "vertices": 2295,
+    "connected_components": 1,
+    "bones": 12,
+    "blended_vertices": 1209
+  },
+  "rifle ORIGINAL SPRITE": {
+    "vertices": 2016,
+    "connected_components": 1,
+    "bones": 12,
+    "blended_vertices": 1084
+  },
+  "actions": [
+    "boss/attack",
+    "boss/idle",
+    "boss/walk",
+    "grunt/fire",
+    "grunt/fire_down",
+    "grunt/fire_up",
+    "grunt/idle",
+    "grunt/idle_down",
+    "grunt/idle_up",
+    "grunt/walk",
+    "grunt/walk_down",
+    "grunt/walk_fire",
+    "grunt/walk_fire_down",
+    "grunt/walk_fire_up",
+    "grunt/walk_up",
+    "player/fire",
+    "player/fire_down",
+    "player/fire_up",
+    "player/idle",
+    "player/idle_down",
+    "player/idle_up",
+    "player/walk",
+    "player/walk_down",
+    "player/walk_fire",
+    "player/walk_fire_down",
+    "player/walk_fire_up",
+    "player/walk_up",
+    "rifle/fire",
+    "rifle/fire_down",
+    "rifle/fire_up",
+    "rifle/idle",
+    "rifle/idle_down",
+    "rifle/idle_up",
+    "rifle/walk",
+    "rifle/walk_down",
+    "rifle/walk_fire",
+    "rifle/walk_fire_down",
+    "rifle/walk_fire_up",
+    "rifle/walk_up"
+  ]
+}

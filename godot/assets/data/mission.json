@@ -1,0 +1,436 @@
+{
+  "player": {
+    "position": [
+      320.0,
+      360.0
+    ],
+    "kind": "player",
+    "hp": 100,
+    "radius": 16
+  },
+  "cover": [
+    {
+      "position": [
+        470.0,
+        530.0
+      ],
+      "kind": "crate",
+      "hp": 65,
+      "radius": 29
+    },
+    {
+      "position": [
+        760.0,
+        340.0
+      ],
+      "kind": "crate",
+      "hp": 65,
+      "radius": 29
+    },
+    {
+      "position": [
+        1050.0,
+        170.0
+      ],
+      "kind": "crate",
+      "hp": 65,
+      "radius": 29
+    },
+    {
+      "position": [
+        1110.0,
+        200.0
+      ],
+      "kind": "crate",
+      "hp": 65,
+      "radius": 29
+    },
+    {
+      "position": [
+        1550.0,
+        440.0
+      ],
+      "kind": "crate",
+      "hp": 65,
+      "radius": 29
+    },
+    {
+      "position": [
+        1810.0,
+        500.0
+      ],
+      "kind": "crate",
+      "hp": 65,
+      "radius": 29
+    },
+    {
+      "position": [
+        2100.0,
+        390.0
+      ],
+      "kind": "crate",
+      "hp": 65,
+      "radius": 29
+    },
+    {
+      "position": [
+        560.0,
+        210.0
+      ],
+      "kind": "barrel",
+      "hp": 28,
+      "radius": 29
+    },
+    {
+      "position": [
+        1200.0,
+        440.0
+      ],
+      "kind": "barrel",
+      "hp": 28,
+      "radius": 29
+    },
+    {
+      "position": [
+        1740.0,
+        270.0
+      ],
+      "kind": "barrel",
+      "hp": 28,
+      "radius": 29
+    }
+  ],
+  "relays": [
+    {
+      "position": [
+        650.0,
+        165.0
+      ],
+      "kind": "relay",
+      "hp": 170,
+      "radius": 27
+    },
+    {
+      "position": [
+        1300.0,
+        510.0
+      ],
+      "kind": "relay",
+      "hp": 170,
+      "radius": 27
+    },
+    {
+      "position": [
+        1930.0,
+        210.0
+      ],
+      "kind": "relay",
+      "hp": 170,
+      "radius": 27
+    }
+  ],
+  "enemies": [
+    {
+      "position": [
+        590.0,
+        250.0
+      ],
+      "kind": "rifle",
+      "hp": 35,
+      "radius": 18
+    },
+    {
+      "position": [
+        628.0,
+        328.0
+      ],
+      "kind": "grunt",
+      "hp": 45,
+      "radius": 18
+    },
+    {
+      "position": [
+        666.0,
+        406.0
+      ],
+      "kind": "grunt",
+      "hp": 45,
+      "radius": 18
+    },
+    {
+      "position": [
+        704.0,
+        484.0
+      ],
+      "kind": "rifle",
+      "hp": 35,
+      "radius": 18
+    },
+    {
+      "position": [
+        742.0,
+        250.0
+      ],
+      "kind": "grunt",
+      "hp": 45,
+      "radius": 18
+    },
+    {
+      "position": [
+        780.0,
+        328.0
+      ],
+      "kind": "grunt",
+      "hp": 45,
+      "radius": 18
+    },
+    {
+      "position": [
+        818.0,
+        406.0
+      ],
+      "kind": "rifle",
+      "hp": 35,
+      "radius": 18
+    },
+    {
+      "position": [
+        856.0,
+        484.0
+      ],
+      "kind": "grunt",
+      "hp": 45,
+      "radius": 18
+    },
+    {
+      "position": [
+        894.0,
+        250.0
+      ],
+      "kind": "grunt",
+      "hp": 45,
+      "radius": 18
+    },
+    {
+      "position": [
+        932.0,
+        328.0
+      ],
+      "kind": "rifle",
+      "hp": 35,
+      "radius": 18
+    },
+    {
+      "position": [
+        970.0,
+        406.0
+      ],
+      "kind": "grunt",
+      "hp": 45,
+      "radius": 18
+    },
+    {
+      "position": [
+        1008.0,
+        484.0
+      ],
+      "kind": "grunt",
+      "hp": 45,
+      "radius": 18
+    },
+    {
+      "position": [
+        1046.0,
+        250.0
+      ],
+      "kind": "rifle",
+      "hp": 35,
+      "radius": 18
+    },
+    {
+      "position": [
+        1084.0,
+        328.0
+      ],
+      "kind": "grunt",
+      "hp": 45,
+      "radius": 18
+    }
+  ],
+  "fires": [
+    [
+      170.0,
+      55.0
+    ],
+    [
+      550.0,
+      40.0
+    ],
+    [
+      930.0,
+      65.0
+    ],
+    [
+      1470.0,
+      35.0
+    ],
+    [
+      1870.0,
+      60.0
+    ],
+    [
+      2260.0,
+      45.0
+    ],
+    [
+      780.0,
+      640.0
+    ],
+    [
+      1640.0,
+      645.0
+    ]
+  ],
+  "extraction": [
+    2280,
+    510
+  ],
+  "world_size": [
+    2400,
+    700
+  ],
+  "facades": [
+    {
+      "position": [
+        0,
+        0
+      ],
+      "variant": 0,
+      "anchor": [
+        0,
+        286
+      ]
+    },
+    {
+      "position": [
+        220,
+        0
+      ],
+      "variant": 1,
+      "anchor": [
+        0,
+        286
+      ]
+    },
+    {
+      "position": [
+        440,
+        0
+      ],
+      "variant": 2,
+      "anchor": [
+        0,
+        286
+      ]
+    },
+    {
+      "position": [
+        660,
+        0
+      ],
+      "variant": 3,
+      "anchor": [
+        0,
+        286
+      ]
+    },
+    {
+      "position": [
+        880,
+        0
+      ],
+      "variant": 0,
+      "anchor": [
+        0,
+        286
+      ]
+    },
+    {
+      "position": [
+        1100,
+        0
+      ],
+      "variant": 1,
+      "anchor": [
+        0,
+        286
+      ]
+    },
+    {
+      "position": [
+        1320,
+        0
+      ],
+      "variant": 2,
+      "anchor": [
+        0,
+        286
+      ]
+    },
+    {
+      "position": [
+        1540,
+        0
+      ],
+      "variant": 3,
+      "anchor": [
+        0,
+        286
+      ]
+    },
+    {
+      "position": [
+        1760,
+        0
+      ],
+      "variant": 0,
+      "anchor": [
+        0,
+        286
+      ]
+    },
+    {
+      "position": [
+        1980,
+        0
+      ],
+      "variant": 1,
+      "anchor": [
+        0,
+        286
+      ]
+    },
+    {
+      "position": [
+        2200,
+        0
+      ],
+      "variant": 2,
+      "anchor": [
+        0,
+        286
+      ]
+    },
+    {
+      "position": [
+        2420,
+        0
+      ],
+      "variant": 3,
+      "anchor": [
+        0,
+        286
+      ]
+    }
+  ]
+}
