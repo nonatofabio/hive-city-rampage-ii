@@ -3,12 +3,14 @@
 Requires Godot 4.3 templates, Java 17, and Android SDK build-tools 34.0.0.
 JAVA_HOME and ANDROID_HOME may override the locally configured toolchain.
 """
+import configparser
 import hashlib
 import json
 import os
 from pathlib import Path
 import plistlib
-import shutil
+import sys
+from toolchain import godot_binary
 import subprocess
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -16,20 +18,24 @@ BUILD = ROOT / 'build'
 
 
 def main():
-    cached_engine = Path.home()/'Library/Caches/ashgate-build/godot-4.3/Godot.app/Contents/MacOS/Godot'
-    engine = os.environ.get('GODOT_BIN') or (str(cached_engine) if cached_engine.is_file() else None) or shutil.which('godot') or shutil.which('godot4') or '/Applications/Godot.app/Contents/MacOS/Godot'
-    if not shutil.which(engine):
-        raise SystemExit('Install Godot 4.3 with matching export templates or set GODOT_BIN.')
-    sdk = Path(os.environ.get('ANDROID_HOME', str(Path.home()/'Library/Android/sdk')))
+    if sys.platform != 'darwin':
+        raise SystemExit('make build requires macOS for app signing and packaging.')
+    engine = godot_binary()
+    sdk = Path(os.environ.get('ANDROID_HOME') or str(Path.home()/'Library/Android/sdk'))
     java = os.environ.get('JAVA_HOME')
-    cached_java = Path.home()/'Library/Caches/ashgate-build/java-home.txt'
-    if not java and cached_java.exists():
-        java = cached_java.read_text().strip()
-    if not java:
-        raise SystemExit('Set JAVA_HOME to Java 17 before building Android.')
+    if not java or not (Path(java)/'bin/java').is_file():
+        raise SystemExit('Set JAVA_HOME to Java 17 in Makefile.local before building.')
+    signer = sdk/'build-tools/34.0.0/apksigner'
+    if not signer.is_file():
+        raise SystemExit('Install Android build-tools 34.0.0 and set ANDROID_HOME in Makefile.local.')
     env = dict(os.environ, JAVA_HOME=java, ANDROID_HOME=str(sdk))
+    presets = configparser.ConfigParser(interpolation=None)
+    presets.read(ROOT/'godot/export_presets.cfg')
+    version = json.loads(presets['preset.0.options']['application/version'])
+    if json.loads(presets['preset.1.options']['version/name']) != version:
+        raise SystemExit('macOS and Android versions must match in export_presets.cfg.')
     app = BUILD / 'macos/Hyve City Rampage II.app'
-    apk = BUILD / 'android/Hyve-City-Rampage-II-0.2.0.apk'
+    apk = BUILD / f'android/Hyve-City-Rampage-II-{version}.apk'
     (BUILD/'logs').mkdir(parents=True,exist_ok=True)
     # Import new assets and register script classes on a fresh checkout before exporting.
     import_log = BUILD/'logs/import.log'
@@ -50,7 +56,6 @@ def main():
             raise SystemExit(f'{preset} export failed; see {log}')
         print(f'Exported {output}',flush=True)
     subprocess.run(['codesign','--verify','--deep','--strict',str(app)],check=True)
-    signer = sdk/'build-tools/34.0.0/apksigner'
     signed = subprocess.run([str(signer),'verify','--verbose',str(apk)],env=env,text=True,
                             stdout=subprocess.PIPE,stderr=subprocess.STDOUT,check=True)
     (BUILD/'logs/android-signature.txt').write_text(signed.stdout)
@@ -58,10 +63,10 @@ def main():
     metadata = plistlib.loads((app/'Contents/Info.plist').read_bytes())
     binary = app/'Contents/MacOS'/metadata['CFBundleExecutable']
     print(subprocess.check_output(['file',str(binary)],text=True),flush=True)
-    archive = BUILD/'Hyve-City-Rampage-II-0.2.0-macOS.zip'
+    archive = BUILD/f'Hyve-City-Rampage-II-{version}-macOS.zip'
     subprocess.run(['ditto','-c','-k','--sequesterRsrc','--keepParent',str(app),str(archive)],check=True)
-    manifest = {'version':'0.2.0','engine':subprocess.check_output([engine,'--version'],text=True).strip(),'python_source':'b9828a619a8e61b036e05c676d055580787e9dfb',
-                'worktree_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
+    manifest = {'version':version,'engine':subprocess.check_output([engine,'--version'],text=True).strip(),'art_source_commit':'b9828a619a8e61b036e05c676d055580787e9dfb',
+                'source_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
                 'macos_signing':'ad-hoc, not notarized','android_signing':'local Android debug key',
                 'artifacts':{str(p.relative_to(BUILD)):{'bytes':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest()} for p in [archive,apk]}}
     (BUILD/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')

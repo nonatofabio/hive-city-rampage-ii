@@ -1,5 +1,9 @@
 # Ashgate art provenance
 
+Historical generation record from [the original project](https://github.com/nonatofabio/hive-city-rampage).
+Tool and prototype paths below refer to that repository at art handoff `b9828a6`,
+not commands or dependencies of this sequel. Runtime assets are self-contained in `godot/assets/`.
+
 ## Servo-skull and spent brass
 
 `ashgate_servo_casings.png` was created with the built-in image generation tool as a new atlas. The returned image is 1254×1254 with real alpha and four cells. `tools/prepare_ashgate_effects.py` imports the servo-skull at 40×56 and three spent-casing views at 12×6, 12×12, and 8×7. The HUD sayings are original Latin-styled snippets, not quotations from another game.

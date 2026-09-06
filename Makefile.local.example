@@ -1,0 +1,4 @@
+# Copy to Makefile.local and adjust for your machine.
+GODOT_BIN := /Applications/Godot.app/Contents/MacOS/Godot
+JAVA_HOME := /path/to/jdk-17/Contents/Home
+ANDROID_HOME := /path/to/Android/sdk

@@ -32,7 +32,7 @@ func run() -> void:
 	game.test_mode = true
 	game.set_physics_process(false)
 	game.muted = true
-	var reference: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://tests/pygame_reference.json"))
+	var reference: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://tests/baseline_reference.json"))
 	for item: Dictionary in reference.poses:
 		var key := game.poses.pose(item.kind,item.stride,item.moving,item.angle,item.recoil,item.time)
 		check(key.model == item.key[0] and key.clip == item.key[1] and key.index == int(item.key[2]),"Reference pose %s" % str(item.key))

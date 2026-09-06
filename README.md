@@ -1,19 +1,31 @@
 # Hyve City Rampage II
 
 A gothic isometric shooter by **nonatofabio**, built in **Godot 4**.
-Deploy into the burning streets of Ashgate, destroy three signal relays,
-bring down the siege walker, and fight your way to extraction.
+Deploy into Ashgate, destroy three signal relays, bring down the siege walker,
+and fight your way to extraction.
 
 ![Hyve City Rampage II title screen](static/hyve-title.png)
 
-## Play
+## Play and develop
 
-Download a macOS or Android test build from [Releases](https://github.com/nonatofabio/hyve-city-rampage-ii/releases).
-macOS builds are locally signed and not notarized. Android test APKs use a debug signing key.
+Download macOS and Android previews from [Releases](https://github.com/nonatofabio/hyve-city-rampage-ii/releases).
+The previews use local test signing: macOS is not notarized; Android uses a debug key.
 
-From source, open `godot/project.godot` in Godot 4.3 or later, or double-click
-**Play Godot.command** on macOS, or run `./run.sh`. No Python installation is needed to play.
-Choose **Deploy to Ashgate** on the opening screen. **Field Orders** explains the mission and controls.
+From source, install Godot 4.3, Make, and Python 3 (standard library only):
+
+```sh
+make run       # Launch the title screen
+make editor    # Open the Godot editor
+make test      # Menu, touch, combat, and silhouette checks
+make build     # macOS + Android packages; requires the export toolchain
+make capture   # Title, mission, and animation review images
+make clean     # Delete generated builds and Godot caches
+```
+
+Use `make run GAME_ARGS="--mute --touch"` to preview the touch interface on desktop.
+Set tool paths in ignored `Makefile.local` or on the command line, for example
+`make run GODOT_BIN=/path/to/Godot`. See [BUILDING.md](BUILDING.md) for export setup.
+You can also open `godot/project.godot` directly in Godot; Python is not a game runtime dependency.
 
 | Action | Desktop | Android |
 | --- | --- | --- |
@@ -23,16 +35,12 @@ Choose **Deploy to Ashgate** on the opening screen. **Field Orders** explains th
 | Dash | Shift | DASH |
 | Pause | Escape | PAUSE |
 
-## Development
+## Project layout
 
-```sh
-python3 tools/validate_godot.py
-./build.sh
-```
-
-Validation covers menu input, touch controls, combat, mission completion, and the
-original sprite registration and silhouette audits. Exporting requires matching
-Godot export templates, Java 17, and an Android SDK. See [technical notes](godot/README.md).
+- `godot/`: game scenes, scripts, runtime assets, and native tests.
+- `art/`: editable Blender sources and original audio clips.
+- `tools/`: standard-library helpers used by Make for validation and packaging.
+- `static/`: current title-screen preview.
 
 ## Origins and credits
 
@@ -42,10 +50,10 @@ The original top-down Pygame game credits Claude; its README/screenshots commit
 The native Godot implementation and sequel menu were developed with Codex (GPT-6),
 under Fabio Nonato’s direction.
 
-The final Pygame art handoff is `b9828a6`; its source and Blender tools are retained
-for asset editing and comparison. See the [legacy documentation](README_LEGACY.md).
-Ashgate Siege is the first mission of Hyve City Rampage II.
+The final art handoff is `b9828a6` in the original repository. The sequel contains
+its own runtime assets and frozen reference fixtures; legacy engines and their
+asset-generation programs remain in the original project.
 
 Typography: Cinzel by Natanael Gama and Rajdhani by Indian Type Foundry.
-Their SIL Open Font License notices ship in `godot/assets/fonts/`.
-[Audio credits](src/pyg/assets/audio/CREDITS.md) retain source attribution.
+Font licenses ship in `godot/assets/fonts/`. See [audio credits](godot/assets/audio/CREDITS.md)
+and [historical art provenance](godot/assets/ART_PROVENANCE.md).

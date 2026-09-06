@@ -1,8 +1,8 @@
-# Final Python visual handoff
+# Baseline sprite visual audit
 
 Reviewed and migrated source commit `b9828a6` after the earlier `fccbb04` cleanup.
-All changes are isolated in `feat/ashgate-godot`; the original Python checkout was
-read only during the migration.
+This historical migration audit defines the accepted sprite baseline. The source
+commits refer to the predecessor repository; current checks run through `make test`.
 
 ## Findings and resolved migration gaps
 
