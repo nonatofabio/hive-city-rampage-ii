@@ -16,7 +16,10 @@ BUILD = ROOT / 'build'
 
 
 def main():
-    engine = os.environ.get('GODOT_BIN') or shutil.which('godot') or '/Applications/Godot.app/Contents/MacOS/Godot'
+    cached_engine = Path.home()/'Library/Caches/ashgate-build/godot-4.3/Godot.app/Contents/MacOS/Godot'
+    engine = os.environ.get('GODOT_BIN') or (str(cached_engine) if cached_engine.is_file() else None) or shutil.which('godot') or shutil.which('godot4') or '/Applications/Godot.app/Contents/MacOS/Godot'
+    if not shutil.which(engine):
+        raise SystemExit('Install Godot 4.3 with matching export templates or set GODOT_BIN.')
     sdk = Path(os.environ.get('ANDROID_HOME', str(Path.home()/'Library/Android/sdk')))
     java = os.environ.get('JAVA_HOME')
     cached_java = Path.home()/'Library/Caches/ashgate-build/java-home.txt'
@@ -28,6 +31,13 @@ def main():
     app = BUILD / 'macos/Hyve City Rampage II.app'
     apk = BUILD / 'android/Hyve-City-Rampage-II-0.2.0.apk'
     (BUILD/'logs').mkdir(parents=True,exist_ok=True)
+    # Import new assets and register script classes on a fresh checkout before exporting.
+    import_log = BUILD/'logs/import.log'
+    with import_log.open('w') as stream:
+        imported = subprocess.run([engine,'--headless','--editor','--path',str(ROOT/'godot'),'--import'],
+                                  stdout=stream,stderr=subprocess.STDOUT,env=env,timeout=180)
+    if imported.returncode or 'ERROR:' in import_log.read_text():
+        raise SystemExit(f'Godot import failed; see {import_log}')
     for preset, flag, output in [('macOS','--export-release',app),('Android','--export-debug',apk)]:
         output.parent.mkdir(parents=True,exist_ok=True)
         log = BUILD/'logs'/f'export-{preset}.log'

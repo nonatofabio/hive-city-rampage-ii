@@ -12,7 +12,7 @@ Download a macOS or Android test build from [Releases](https://github.com/nonato
 macOS builds are locally signed and not notarized. Android test APKs use a debug signing key.
 
 From source, open `godot/project.godot` in Godot 4.3 or later, or double-click
-**Play Godot.command** on macOS. No Python installation is needed to play.
+**Play Godot.command** on macOS, or run `./run.sh`. No Python installation is needed to play.
 Choose **Deploy to Ashgate** on the opening screen. **Field Orders** explains the mission and controls.
 
 | Action | Desktop | Android |
@@ -27,7 +27,7 @@ Choose **Deploy to Ashgate** on the opening screen. **Field Orders** explains th
 
 ```sh
 python3 tools/validate_godot.py
-python3 tools/build_releases.py
+./build.sh
 ```
 
 Validation covers menu input, touch controls, combat, mission completion, and the
