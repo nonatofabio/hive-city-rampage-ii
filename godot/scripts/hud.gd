@@ -54,13 +54,13 @@ func _draw() -> void:
 		draw_circle(map_point(game.extraction),3,Color("64e8af"),false)
 	panel(Rect2(16,477,928,47))
 	var touch: bool = game.touch_controls.enabled and not game.controller_active
-	text(("FRAG %02d" if touch else "FRAG %02d  [L1]" if game.controller_active else "FRAG %02d  [SPACE / RMB]") % game.grenades,Vector2(30,490),GOLD,12)
-	text("DASH " + ("READY" if game.dash_cd <= 0 else "%.1fs" % game.dash_cd) + ("" if touch else " [R1]" if game.controller_active else " [SHIFT]"),Vector2(245,490),Color("d2ccb5"),12)
+	text(("FRAG %02d" if touch else "FRAG %02d  [L2]" if game.controller_active else "FRAG %02d  [SPACE / RMB]") % game.grenades,Vector2(30,490),GOLD,12)
+	text("DASH " + ("READY" if game.dash_cd <= 0 else "%.1fs" % game.dash_cd) + ("" if touch else " [L3]" if game.controller_active else " [SHIFT]"),Vector2(245,490),Color("d2ccb5"),12)
 	var objective := ("PUMPS %d/3" if game.level == 2 else "RELAYS %d/3") % game.relays_down()
 	if game.boss_spawned:
 		objective = "REACH EXTRACTION" if game.boss_defeated else "DESTROY THE WALKER"
 	text(objective,Vector2(477,490),Color("e69750"),12)
-	text("LEFT MOVE / RIGHT AIM + FIRE" if touch else "LS MOVE / RS FIRE / START" if game.controller_active else "WASD MOVE / LMB FIRE / ESC",Vector2(717,491),Color("899095"),11)
+	text("LEFT MOVE / RIGHT AIM + FIRE" if touch else "RS AIM / R2 FIRE / START" if game.controller_active else "WASD MOVE / LMB FIRE / ESC",Vector2(717,491),Color("899095"),11)
 	if game.message_timer > 0.0:
 		var width := font.get_string_size(game.message,HORIZONTAL_ALIGNMENT_LEFT,-1,12).x
 		draw_rect(Rect2(480-width/2-12,133,width+24,28),Color("18191c"))

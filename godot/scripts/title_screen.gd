@@ -84,8 +84,8 @@ func _draw() -> void:
 			controls = "Left stick  Move     Right stick  Aim + fire"
 			actions = "Tap FRAG, DASH or PAUSE for tactical actions"
 		if game.controller_active:
-			controls = "Left stick / D-pad  Move     Right stick  Aim + fire"
-			actions = "L1  Frag     R1  Dash     R2  Fire     START  Pause"
+			controls = "Left stick / D-pad  Move     Right stick  Aim"
+			actions = "L2  Frag     L3  Dash     R2  Fire     START  Pause"
 		centered(controls,264,BODY_FONT,18,GOLD)
 		centered(actions,291,BODY_FONT,18,GOLD)
 

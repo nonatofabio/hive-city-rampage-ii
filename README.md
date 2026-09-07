@@ -50,9 +50,9 @@ You can also open `godot/project.godot` directly in Godot; Python is not a game 
 | Action | Desktop | Android touchscreen | Controller |
 | --- | --- | --- | --- |
 | Move | WASD | Left virtual stick | Left stick / D-pad |
-| Aim / fire | Mouse / left click | Right virtual stick | Right stick (aim + fire), R2 (fire) |
-| Grenade | Space / right click | FRAG | L1 |
-| Dash | Shift | DASH | R1 |
+| Aim / fire | Mouse / left click | Right virtual stick | Right stick (aim), R2 (fire) |
+| Grenade | Space / right click | FRAG | L2 |
+| Dash | Shift | DASH | Left stick click (L3) |
 | Pause | Escape | PAUSE | Start |
 
 Physical gamepads work on Android and desktop alongside touchscreen controls.

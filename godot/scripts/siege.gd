@@ -56,6 +56,7 @@ var frame_number := 0
 var screenshot_path := ""
 var capture_pending := false
 var test_mode := false
+var grenade_trigger_pressed := false
 var controller_active := false
 var controller_aim := Vector2.RIGHT
 var at_title := false
@@ -124,13 +125,13 @@ func _install_inputs() -> void:
 		var event := InputEventKey.new()
 		event.physical_keycode = bindings[action]
 		_bind(action,event)
-	var buttons := {"ui_left":JOY_BUTTON_DPAD_LEFT, "ui_right":JOY_BUTTON_DPAD_RIGHT, "ui_up":JOY_BUTTON_DPAD_UP, "ui_down":JOY_BUTTON_DPAD_DOWN, "ui_accept":JOY_BUTTON_A, "ui_cancel":JOY_BUTTON_B, "move_left":JOY_BUTTON_DPAD_LEFT, "move_right":JOY_BUTTON_DPAD_RIGHT, "move_up":JOY_BUTTON_DPAD_UP, "move_down":JOY_BUTTON_DPAD_DOWN, "dash":JOY_BUTTON_RIGHT_SHOULDER, "grenade":JOY_BUTTON_LEFT_SHOULDER, "pad_pause":JOY_BUTTON_START, "pad_confirm":JOY_BUTTON_A, "pad_back":JOY_BUTTON_B}
+	var buttons := {"ui_left":JOY_BUTTON_DPAD_LEFT, "ui_right":JOY_BUTTON_DPAD_RIGHT, "ui_up":JOY_BUTTON_DPAD_UP, "ui_down":JOY_BUTTON_DPAD_DOWN, "ui_accept":JOY_BUTTON_A, "ui_cancel":JOY_BUTTON_B, "move_left":JOY_BUTTON_DPAD_LEFT, "move_right":JOY_BUTTON_DPAD_RIGHT, "move_up":JOY_BUTTON_DPAD_UP, "move_down":JOY_BUTTON_DPAD_DOWN, "dash":JOY_BUTTON_LEFT_STICK, "pad_pause":JOY_BUTTON_START, "pad_confirm":JOY_BUTTON_A, "pad_back":JOY_BUTTON_B}
 	for action: String in buttons:
 		var event := InputEventJoypadButton.new()
 		event.device = -1
 		event.button_index = buttons[action]
 		_bind(action,event)
-	for binding: Array in [["move_left",JOY_AXIS_LEFT_X,-1.0],["move_right",JOY_AXIS_LEFT_X,1.0],["move_up",JOY_AXIS_LEFT_Y,-1.0],["move_down",JOY_AXIS_LEFT_Y,1.0],["aim_left",JOY_AXIS_RIGHT_X,-1.0],["aim_right",JOY_AXIS_RIGHT_X,1.0],["aim_up",JOY_AXIS_RIGHT_Y,-1.0],["aim_down",JOY_AXIS_RIGHT_Y,1.0],["pad_fire",JOY_AXIS_TRIGGER_RIGHT,1.0]]:
+	for binding: Array in [["move_left",JOY_AXIS_LEFT_X,-1.0],["move_right",JOY_AXIS_LEFT_X,1.0],["move_up",JOY_AXIS_LEFT_Y,-1.0],["move_down",JOY_AXIS_LEFT_Y,1.0],["aim_left",JOY_AXIS_RIGHT_X,-1.0],["aim_right",JOY_AXIS_RIGHT_X,1.0],["aim_up",JOY_AXIS_RIGHT_Y,-1.0],["aim_down",JOY_AXIS_RIGHT_Y,1.0],["pad_fire",JOY_AXIS_TRIGGER_RIGHT,1.0],["pad_grenade",JOY_AXIS_TRIGGER_LEFT,1.0]]:
 		var event := InputEventJoypadMotion.new()
 		event.device = -1
 		event.axis = binding[1]
@@ -140,6 +141,7 @@ func _install_inputs() -> void:
 func _controller_connection_changed(_device: int, connected: bool) -> void:
 	controller_active = not Input.get_connected_joypads().is_empty()
 	if not connected:
+		grenade_trigger_pressed = false
 		toggle_pause_if_playing()
 	if at_title:
 		title_screen.deploy.grab_focus()
@@ -154,6 +156,14 @@ func _input(event: InputEvent) -> void:
 		controller_active = true
 	elif event is InputEventScreenTouch or event is InputEventScreenDrag or event is InputEventKey or (event is InputEventMouseMotion and event.relative.length()>1.0):
 		controller_active = false
+	# Analog triggers emit repeated motion events while held. Throw only on
+	# crossing the dead zone, and require release before another grenade.
+	if event is InputEventJoypadMotion and event.axis == JOY_AXIS_TRIGGER_LEFT:
+		var pressed: bool = event.axis_value > InputMap.action_get_deadzone("pad_grenade")
+		if pressed and not grenade_trigger_pressed and not at_title:
+			var stick := Input.get_vector("aim_left","aim_right","aim_up","aim_down",0.2)
+			grenade(stick_target(stick.normalized() if stick != Vector2.ZERO else controller_aim))
+		grenade_trigger_pressed = pressed
 	title_screen.queue_redraw()
 
 func stick_target(direction: Vector2) -> Vector2:
@@ -631,7 +641,7 @@ func _physics_process(dt: float) -> void:
 		if stick != Vector2.ZERO:
 			controller_aim = stick.normalized()
 		target = stick_target(controller_aim)
-		shooting = stick != Vector2.ZERO or Input.is_action_pressed("pad_fire")
+		shooting = Input.is_action_pressed("pad_fire")
 	if smoke_frames > 0:
 		movement = Vector2(cos(frame_number*0.015),sin(frame_number*0.015))
 		target = enemies[0].world_pos if not enemies.is_empty() else relays[0].world_pos
@@ -676,9 +686,6 @@ func _unhandled_input(event: InputEvent) -> void:
 				toggle_pause()
 		elif event.is_action_pressed("pad_back") and (paused or state != "playing"):
 			show_title()
-		elif event.is_action_pressed("grenade"):
-			var stick := Input.get_vector("aim_left","aim_right","aim_up","aim_down",0.2)
-			grenade(stick_target(stick.normalized() if stick != Vector2.ZERO else controller_aim))
 		return
 	if at_title:
 		return
