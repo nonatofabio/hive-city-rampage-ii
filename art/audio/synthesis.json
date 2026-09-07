@@ -1,0 +1,62 @@
+{
+  "bolter_0.wav": {
+    "seconds": 0.48,
+    "peak_dbfs": -1.7237229523256667,
+    "rms_dbfs": -17.2216130641216
+  },
+  "bolter_1.wav": {
+    "seconds": 0.48,
+    "peak_dbfs": -1.7237229523256667,
+    "rms_dbfs": -16.982195692425513
+  },
+  "bolter_2.wav": {
+    "seconds": 0.48,
+    "peak_dbfs": -1.7237229523256667,
+    "rms_dbfs": -16.816938119287638
+  },
+  "bolter_3.wav": {
+    "seconds": 0.48,
+    "peak_dbfs": -1.7237229523256667,
+    "rms_dbfs": -16.822459751769927
+  },
+  "grenade_0.wav": {
+    "seconds": 1.9,
+    "peak_dbfs": -1.7237229523256667,
+    "rms_dbfs": -16.55715832374119
+  },
+  "grenade_1.wav": {
+    "seconds": 1.9,
+    "peak_dbfs": -1.7237229523256667,
+    "rms_dbfs": -16.134773621064944
+  },
+  "grenade_2.wav": {
+    "seconds": 1.9,
+    "peak_dbfs": -1.7237229523256667,
+    "rms_dbfs": -16.30177227123891
+  },
+  "relay_0.wav": {
+    "seconds": 2.5,
+    "peak_dbfs": -1.7237229523256667,
+    "rms_dbfs": -18.780896508544615
+  },
+  "relay_1.wav": {
+    "seconds": 2.5,
+    "peak_dbfs": -1.7237229523256667,
+    "rms_dbfs": -18.86466473016062
+  },
+  "chainsword_0.wav": {
+    "seconds": 0.48,
+    "peak_dbfs": -1.7237229523256667,
+    "rms_dbfs": -11.598905928912718
+  },
+  "chainsword_1.wav": {
+    "seconds": 0.48,
+    "peak_dbfs": -1.7237229523256667,
+    "rms_dbfs": -11.249034398438125
+  },
+  "chainsword_2.wav": {
+    "seconds": 0.48,
+    "peak_dbfs": -1.7237229523256667,
+    "rms_dbfs": -11.192132399240514
+  }
+}

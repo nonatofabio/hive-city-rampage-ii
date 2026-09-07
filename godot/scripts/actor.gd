@@ -17,6 +17,9 @@ var max_hp := 45.0
 var cooldown := 0.0
 var flash := 0.0
 var recoil := 0.0
+var melee_time := 0.0
+var melee_direction := Vector2.RIGHT
+var chainsword: Node2D
 var stride := 0.0
 var moving := false
 var facing := 1
@@ -32,6 +35,13 @@ var ejection := Vector2.ZERO
 @onready var lower: Sprite2D = $Lower
 @onready var body: Sprite2D = $Body
 @onready var muzzle_flash: Sprite2D = $Muzzle
+
+func _ready() -> void:
+	if kind == "player":
+		chainsword = Node2D.new()
+		chainsword.z_index = 2
+		chainsword.set_script(preload("res://scripts/chainsword.gd"))
+		add_child(chainsword)
 
 func configure(data: Dictionary) -> void:
 	kind = data.kind
@@ -95,7 +105,7 @@ func refresh(library: PoseLibrary, time: float, aim: Vector2, illumination: floa
 		body.region_rect = Rect2(Vector2(key.index * cell.x, 0), cell)
 		body.scale = geo.scale
 		body.flip_h = geo.flip
-		body.position = -Vector2(geo.anchor)
+		body.position = -Vector2(geo.anchor).round()
 		muzzle = geo.muzzle - geo.anchor
 		ejection = geo.ejection - geo.anchor
 		if kind == "player":
@@ -105,7 +115,7 @@ func refresh(library: PoseLibrary, time: float, aim: Vector2, illumination: floa
 			lower.texture = library.texture("res://assets/rendered/walk/%d.png" % gait.x)
 			lower.region_rect = Rect2((gait.z % 2 if vertical else gait.z) * 80, 0, 80, 64)
 			lower.flip_h = gait.z >= 2 if vertical else gait.y < 0
-			lower.position = library.lower_origin(key,facing) - Vector2(geo.anchor)
+			lower.position = library.lower_origin(key,facing,gait) - Vector2(geo.anchor).round()
 		if recoil > 0.065 and kind in ["player", "rifle"]:
 			muzzle_flash.visible = true
 			muzzle_flash.texture = library.texture("res://assets/effects/muzzle_%d.png" % (int(time * 24) % 2))
@@ -115,6 +125,8 @@ func refresh(library: PoseLibrary, time: float, aim: Vector2, illumination: floa
 	var glow := illumination * 0.25 + (0.35 if flash > 0.0 else 0.0)
 	body.self_modulate = Color(1.0 + glow, 1.0 + glow * 0.7, 1.0 + glow * 0.35)
 	lower.self_modulate = body.self_modulate
+	if is_instance_valid(chainsword):
+		chainsword.queue_redraw()
 	queue_redraw()
 
 func _draw() -> void:

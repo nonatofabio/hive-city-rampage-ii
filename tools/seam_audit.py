@@ -77,12 +77,18 @@ def geometry_waist(model, clip, index, facing):
         pt[0] = size[0] - pt[0]
     return pt
 
-def lower_origin(model, clip, index, facing):
+def lower_origin(model, clip, index, facing, gait=None):
     w = geometry_waist(model, clip, index, facing)
     if w is None:
         return None
-    return np.array([round_even(w[0]) - 40,
-                     round_even(w[1]) - 12 - int(reg["belt_overlap"][model])])
+    leg = [40,12]
+    if gait is not None:
+        vertical=abs(gait[0])==90
+        frame=gait[2]%2 if vertical else gait[2]
+        leg=list(reg['leg_waists'][str(gait[0])][frame])
+        if (gait[2]>=2 if vertical else gait[1]<0): leg[0]=80-leg[0]
+    return np.array([round_even(w[0]-leg[0]),
+                     round_even(w[1]) - leg[1] - int(reg["belt_overlap"][model])],dtype=int)
 
 _belts = {}
 def belt_points(gait):
@@ -130,6 +136,7 @@ def run():
                         gaits[(view, facing, 0)] = True
                         gaits[(view, facing, 2)] = True
                     for gait in gaits:
+                        origin = lower_origin(model,clip_name,index,facing,gait)
                         bp = belt_points(gait)
                         if len(bp):
                             p = bp + origin

@@ -72,7 +72,7 @@ func run() -> void:
 		near(game.poses.lower_origin(key,actor.facing),Iso.vec(item.origin),"Belt overlap")
 		actor.refresh(game.poses,0.0,Vector2(500,400))
 		check(actor.lower.visible and actor.body.texture.resource_path.contains("/upper/"),"All actions use unified body layers")
-		near(actor.lower.position-actor.body.position,Iso.vec(item.origin),"Actual Sprite2D layer placement")
+		near(actor.lower.position-actor.body.position,game.poses.lower_origin(key,actor.facing,gait),"Measured leg-frame waist placement")
 	for p: Vector2 in [Vector2.ZERO,Vector2(2400,700),Vector2(-20,31),Vector2(320,360)]:
 		near(Iso.unproject(Iso.project(p)),p,"Projection round trip")
 	check(is_equal_approx(Iso.segment_entry(Vector2.ZERO,Vector2(100,0),Vector2(50,0),10),0.4),"Swept hit entry")

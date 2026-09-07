@@ -4,6 +4,12 @@ const DISPLAY_FONT = preload("res://assets/fonts/Cinzel.ttf")
 const BODY_FONT = preload("res://assets/fonts/Rajdhani-SemiBold.ttf")
 const GOLD := Color("d5b577")
 var show_orders := false
+var show_options := false
+var options_from_game := false
+var options_button: Button
+var speed_button: Button
+var view_button: Button
+var volume_button: Button
 @onready var game: SiegeGame = get_parent().get_parent()
 var deploy: Button
 var audio: Button
@@ -18,8 +24,14 @@ func _ready() -> void:
 	deploy = make_button("DEPLOY TO ASHGATE",Rect2(330,339,300,44),game.start_mission)
 	orders_button = make_button("FIELD ORDERS",Rect2(330,393,145,36),toggle_orders)
 	audio = make_button("AUDIO: ON",Rect2(485,393,145,36),toggle_audio)
-	quit_button = make_button("QUIT",Rect2(430,442,100,30),quit_game)
-	close_button = make_button("BACK TO MENU",Rect2(355,355,250,40),close_orders)
+	options_button = make_button("OPTIONS",Rect2(330,442,145,36),open_options)
+	quit_button = make_button("QUIT",Rect2(485,442,145,36),quit_game)
+	speed_button = make_button("",Rect2(285,195,390,40),cycle_speed)
+	view_button = make_button("",Rect2(285,245,390,40),cycle_view)
+	volume_button = make_button("",Rect2(285,295,390,40),cycle_volume)
+	for button: Button in [speed_button,view_button,volume_button]:
+		button.hide()
+	close_button = make_button("BACK TO MENU",Rect2(355,355,250,40),close_panel)
 	close_button.hide()
 	visibility_changed.connect(func():
 		if visible:
@@ -49,6 +61,64 @@ func toggle_audio() -> void:
 	game.muted = not game.muted
 	audio.text = "AUDIO: OFF" if game.muted else "AUDIO: ON"
 
+func close_panel() -> void:
+	if show_options:
+		close_options()
+	else:
+		close_orders()
+
+func open_options() -> void:
+	options_from_game = not game.at_title
+	if options_from_game:
+		game.paused = true
+		game.controller_fire_pressed = false
+		game.hud.hide()
+		game.touch_controls.hide()
+		show()
+	set_orders(true)
+	show_orders = false
+	show_options = true
+	close_button.text = "BACK TO PAUSE" if options_from_game else "BACK TO MENU"
+	for button: Button in [speed_button,view_button,volume_button]:
+		button.show()
+	sync_options()
+	speed_button.grab_focus()
+	queue_redraw()
+
+func close_options() -> void:
+	show_options = false
+	for button: Button in [speed_button,view_button,volume_button]:
+		button.hide()
+	set_orders(false)
+	if options_from_game:
+		hide()
+		game.hud.show()
+		game.touch_controls.visible = game.touch_controls.enabled
+	else:
+		options_button.grab_focus()
+	options_from_game = false
+
+func sync_options() -> void:
+	speed_button.text = "CURSOR SPEED: %.1fx" % game.CURSOR_SPEEDS[game.cursor_speed_index]
+	view_button.text = "VIEW: " + game.view_mode
+	volume_button.text = "SOUND: %d%%" % roundi(game.sfx_volume*100)
+
+func cycle_speed() -> void:
+	game.cursor_speed_index = (game.cursor_speed_index+1)%game.CURSOR_SPEEDS.size()
+	sync_options()
+	game.save_settings()
+
+func cycle_view() -> void:
+	var names := ["WIDE","NORMAL","CLOSE"]
+	game.set_view(names[(names.find(game.view_mode)+1)%names.size()])
+	sync_options()
+	game.save_settings()
+
+func cycle_volume() -> void:
+	game.sfx_volume = 0.0 if game.sfx_volume>0.99 else minf(1.0,game.sfx_volume+0.2)
+	sync_options()
+	game.save_settings()
+
 func toggle_orders() -> void:
 	set_orders(not show_orders)
 
@@ -57,7 +127,8 @@ func close_orders() -> void:
 
 func set_orders(open: bool) -> void:
 	show_orders = open
-	for button: Button in [level_button,deploy,orders_button,audio,quit_button]:
+	close_button.text = "BACK TO MENU"
+	for button: Button in [level_button,deploy,orders_button,audio,options_button,quit_button]:
 		button.visible = not open
 	close_button.visible = open
 	if is_visible_in_tree():
@@ -78,6 +149,11 @@ func _draw() -> void:
 	for x in [34,926]:
 		for y in [34,506]:
 			draw_circle(Vector2(x,y),2,GOLD)
+	if show_options:
+		draw_rect(Rect2(130,100,700,310),Color("10161b"))
+		draw_rect(Rect2(130,100,700,310),GOLD,false,1)
+		centered("OPTIONS",151,DISPLAY_FONT,26,GOLD)
+		return
 	if show_orders:
 		draw_orders()
 		return
@@ -121,3 +197,4 @@ func draw_orders() -> void:
 		actions = "L2  Frag     L3  Dash     R2  Fire     START  Pause"
 	centered(controls,264,BODY_FONT,18,GOLD)
 	centered(actions,291,BODY_FONT,18,GOLD)
+	centered("Hold fire near an enemy to use the chainsword.",324,BODY_FONT,17,GOLD)

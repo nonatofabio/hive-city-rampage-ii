@@ -18,6 +18,7 @@ def main():
         (['--script', 'res://tests/test_title.gd', '--', '--validation', '--touch', '--mute'], 'TITLE PASS:'),
         (['--script', 'res://tests/test_controller.gd', '--', '--validation', '--touch', '--mute'], 'CONTROLLER PASS:'),
         (['--script', 'res://tests/test_quit.gd', '--', '--validation', '--touch', '--mute'], 'QUIT PASS:'),
+        (['--script', 'res://tests/test_upgrade.gd', '--', '--validation', '--touch', '--mute'], 'UPGRADE PASS:'),
         (['--script', 'res://tests/test_cover.gd', '--', '--validation', '--mute'], 'COVER PASS:'),
         (['--script', 'res://tests/test_level_two.gd', '--', '--validation', '--mute'], 'LEVEL TWO PASS:'),
         (['--script', 'res://tests/run_tests.gd', '--', '--validation', '--mute'], 'TEST PASS:'),

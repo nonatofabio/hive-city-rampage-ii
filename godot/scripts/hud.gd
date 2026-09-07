@@ -78,7 +78,7 @@ func _draw() -> void:
 	if game.boss_defeated:
 		target = game.extraction
 	if target != Vector2.INF:
-		var p := Iso.project(target)-game.camera_offset
+		var p := game.world_to_screen(target)
 		if not Rect2(70,160,820,280).has_point(p):
 			p = p.clamp(Vector2(65,172),Vector2(895,440))
 			draw_circle(p,12,GOLD,false,2)
@@ -86,7 +86,7 @@ func _draw() -> void:
 	if game.combo_timer > 0.0 and game.combo > 1:
 		text("%d KILL CHAIN  x%d" % [game.combo,mini(5,game.combo)],Vector2(18,98),Color("f9b850"))
 	if game.state == "playing" and not game.paused:
-		var p: Vector2 = game.controller_cursor if game.controller_active else Iso.project(game.aim)-game.camera_offset-Vector2(0,55)
+		var p: Vector2 = game.controller_cursor if game.controller_active else game.world_to_screen(game.aim,55)
 		draw_circle(p,7,Color("ebcf95"),false)
 		for d: Vector2 in [Vector2.LEFT,Vector2.RIGHT,Vector2.UP,Vector2.DOWN]:
 			draw_line(p+d*8,p+d*12,Color("ebcf95"))
@@ -96,13 +96,13 @@ func _draw() -> void:
 		var title := "PAUSED" if game.paused else (("IRON BELLY SECURED" if game.level == 2 else "ASHGATE LIBERATED") if game.state == "won" else "YOU HAVE FALLEN")
 		text(title,Vector2(270,207),GOLD,30)
 		text("%07d POINTS / %d KILLS / %d SECONDS" % [game.score,game.kills,int(game.time)],Vector2(270,265))
-		var prompt := "ESC TO RESUME" if game.paused else "R TO DEPLOY AGAIN / ESC TO QUIT"
+		var prompt := "ESC RESUME / O OPTIONS" if game.paused else "R TO DEPLOY AGAIN / ESC TO QUIT"
 		if game.state == "won" and game.level == 1 and not touch:
 			prompt = "N FOR IRON BELLY / R TO REPLAY"
 		if touch:
 			prompt = "TAP HERE TO RESUME" if game.paused else "TAP TO DEPLOY IRON BELLY" if game.state == "won" and game.level == 1 else "TAP HERE TO DEPLOY AGAIN"
 		if game.controller_active:
-			prompt = "START / A RESUME / B MENU" if game.paused else "A NEXT MISSION / B MENU" if game.state == "won" and game.level == 1 else "A RETRY / B MENU"
+			prompt = "A RESUME / Y OPTIONS / B MENU" if game.paused else "A NEXT MISSION / B MENU" if game.state == "won" and game.level == 1 else "A RETRY / B MENU"
 		text(prompt,Vector2(270,310),Color("93a4b0"))
 		panel(Rect2(240,373,480,58))
 		var audio_text := "AUDIO %s [M]    GUNFIRE %d%% [- / =]" % ["MUTED" if game.muted else "ON",roundi(game.sfx_volume*100)]

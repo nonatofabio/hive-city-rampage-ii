@@ -100,9 +100,16 @@ static func round_even(value: float) -> int:
 		return lower if posmod(lower,2) == 0 else lower + 1
 	return lower if fraction < 0.5 else lower + 1
 
-func lower_origin(key: Dictionary, facing: int) -> Vector2:
+func lower_origin(key: Dictionary, facing: int, gait: Vector3i = Vector3i(999,0,0)) -> Vector2:
 	var waist: Vector2 = geometry("player",key,facing).waist
-	return Vector2(round_even(waist.x)-40,round_even(waist.y)-12-int(registration.belt_overlap[key.model]))
+	var leg_waist := Vector2(40,12)
+	if gait.x != 999:
+		var vertical := absi(gait.x)==90
+		var frame := gait.z%2 if vertical else gait.z
+		leg_waist = Iso.vec(registration.leg_waists[str(gait.x)][frame])
+		if (gait.z>=2 if vertical else gait.y<0):
+			leg_waist.x = 80-leg_waist.x
+	return Vector2(round_even(waist.x-leg_waist.x),round_even(waist.y)-leg_waist.y-int(registration.belt_overlap[key.model]))
 
 func lower_pose(key: Dictionary, facing: int, stride: float, moving: bool, move_view: int, move_facing: int) -> Vector3i:
 	var body_view := int(VIEWS.find_key(key.model))

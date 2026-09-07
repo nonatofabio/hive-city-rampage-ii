@@ -10,6 +10,7 @@ import os
 from pathlib import Path
 import plistlib
 import sys
+import tarfile
 from toolchain import godot_binary
 import subprocess
 
@@ -36,6 +37,7 @@ def main():
         raise SystemExit('macOS and Android versions must match in export_presets.cfg.')
     app = BUILD / 'macos/Hive City Rampage II.app'
     apk = BUILD / f'android/Hive-City-Rampage-II-{version}.apk'
+    linux = BUILD / 'linux/Hive-City-Rampage-II.x86_64'
     (BUILD/'logs').mkdir(parents=True,exist_ok=True)
     # Import new assets and register script classes on a fresh checkout before exporting.
     import_log = BUILD/'logs/import.log'
@@ -44,7 +46,7 @@ def main():
                                   stdout=stream,stderr=subprocess.STDOUT,env=env,timeout=180)
     if imported.returncode or 'ERROR:' in import_log.read_text():
         raise SystemExit(f'Godot import failed; see {import_log}')
-    for preset, flag, output in [('macOS','--export-release',app),('Android','--export-debug',apk)]:
+    for preset, flag, output in [('macOS','--export-release',app),('Android','--export-debug',apk),('Linux','--export-release',linux)]:
         output.parent.mkdir(parents=True,exist_ok=True)
         log = BUILD/'logs'/f'export-{preset}.log'
         with log.open('w') as stream:
@@ -65,12 +67,21 @@ def main():
     print(subprocess.check_output(['file',str(binary)],text=True),flush=True)
     archive = BUILD/f'Hive-City-Rampage-II-{version}-macOS.zip'
     subprocess.run(['ditto','-c','-k','--sequesterRsrc','--keepParent',str(app),str(archive)],check=True)
-    manifest = {'version':version,'engine':subprocess.check_output([engine,'--version'],text=True).strip(),'art_source_commit':'b9828a619a8e61b036e05c676d055580787e9dfb',
+    linux.chmod(0o755)
+    if linux.read_bytes()[:4] != b'\x7fELF':
+        raise SystemExit('Linux export is not an ELF executable.')
+    linux_notes = linux.parent/'README-Steam-Deck.txt'
+    linux_notes.write_text((ROOT/'STEAM-DECK.md').read_text())
+    linux_archive = BUILD/f'Hive-City-Rampage-II-{version}-Linux-SteamDeck.tar.gz'
+    with tarfile.open(linux_archive,'w:gz') as bundle:
+        bundle.add(linux,arcname='Hive-City-Rampage-II/Hive-City-Rampage-II.x86_64')
+        bundle.add(linux_notes,arcname='Hive-City-Rampage-II/README-Steam-Deck.txt')
+    manifest = {'version' :version,'engine':subprocess.check_output([engine,'--version'],text=True).strip(),'art_source_commit':'b9828a619a8e61b036e05c676d055580787e9dfb',
                 'source_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
                 'macos_signing':'ad-hoc, not notarized','android_signing':'local Android debug key',
-                'artifacts':{str(p.relative_to(BUILD)):{'bytes':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest()} for p in [archive,apk]}}
+                'artifacts':{str(p.relative_to(BUILD)):{'bytes':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest()} for p in [archive,apk,linux_archive]}}
     (BUILD/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
-    print('BUILD PASS: macOS signature, universal binary, signed Android APK, ZIP and hashes',flush=True)
+    print('BUILD PASS: macOS signature, universal binary, signed Android APK, Linux x86-64 ELF, archives and hashes',flush=True)
 
 
 if __name__=='__main__':

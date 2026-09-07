@@ -31,7 +31,7 @@ settings before the first Android build. Install matching export templates throu
 | `make run` | Import assets, then launch the title screen |
 | `make editor` | Import assets, then open the Godot editor |
 | `make test` | Import and run all native regression checks |
-| `make build` | Import, export both platforms, verify signatures, ZIP, hash |
+| `make build` | Import, export all three platforms, verify signatures, ZIP, hash |
 | `make capture` | Render review screenshots into `godot/artifacts/` |
 | `make record` | Record 14-second MP4 with audio and 8-second GIF; requires ffmpeg |
 | `make import-props` | Repack the generated prop atlas into runtime sprites |
@@ -52,6 +52,7 @@ Capture targets need a rendering display. Tests run headlessly.
 
 `godot/export_presets.cfg` defines the version and platform export settings.
 Outputs under `build/` include a universal macOS `.app` and ZIP, an Android APK,
+a native Linux x86-64 executable and Steam Deck tarball,
 logs, and `manifest.json` containing SHA-256 hashes and the source commit.
 The builder preserves existing artifacts and fails on import/export/signature errors.
 
@@ -66,3 +67,5 @@ The MP4 is 960 × 540; the lightweight GIF is 384 × 216 at 10 FPS. Outputs are 
 
 Use `make run GAME_ARGS="--level 2"` to select Iron Belly, and
 `make record-level-two` to record its 16-second gameplay movie.
+
+See [Steam Deck / Linux](STEAM-DECK.md) for the native Linux export and installation.

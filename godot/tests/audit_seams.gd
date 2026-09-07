@@ -3,6 +3,8 @@ extends SceneTree
 var poses: PoseLibrary
 var sheets: Dictionary = {}
 var belts: Dictionary = {}
+var centers: Dictionary = {}
+var maximum_waist_error := 0.0
 
 func _initialize() -> void:
 	run.call_deferred()
@@ -19,6 +21,14 @@ func belt_points(gait: Vector3i) -> Array[Vector2i]:
 		for x in range(80):
 			if roundi(source.get_pixel(step*80+(79-x if flip else x),y).a*255.0)>64:
 				points.append(Vector2i(x,y))
+	var center := 0.0
+	var count := 0
+	for y in range(12,17):
+		for x in range(80):
+			if roundi(source.get_pixel(step*80+(79-x if flip else x),y).a*255.0)>64:
+				center+=x+0.5
+				count+=1
+	centers[gait]=center/maxi(1,count)
 	belts[gait]=points
 	return points
 
@@ -45,7 +55,6 @@ func run() -> void:
 					var mask:=BitMap.new()
 					mask.create_from_image_alpha(upper,64.0/255.0)
 					var key: Dictionary={"model":model,"clip":clip_name,"index":index}
-					var origin:=Vector2i(poses.lower_origin(key,facing))
 					var gaits: Dictionary={}
 					if clip_name.begins_with("walk"):
 						for travel: int in PoseLibrary.VIEWS:
@@ -55,11 +64,16 @@ func run() -> void:
 						gaits[Vector3i(view,facing,0)]=true
 						gaits[Vector3i(view,facing,2)]=true
 					for gait: Vector3i in gaits:
+						var origin:=Vector2i(poses.lower_origin(key,facing,gait))
 						var overlap:=0
 						for pixel: Vector2i in belt_points(gait):
 							var point:=pixel+origin
 							if Rect2i(Vector2i.ZERO,mask.get_size()).has_point(point) and mask.get_bitv(point):
 								overlap+=1
+						var error := absf(float(origin.x)+float(centers[gait])-poses.geometry("player",key,facing).waist.x)
+						maximum_waist_error=maxf(maximum_waist_error,error)
+						if error>0.51:
+							failures+=1
 						if overlap<minimum:
 							minimum=overlap
 							worst=[clip_name,index,facing,gait.x,gait.y,gait.z]
@@ -69,6 +83,7 @@ func run() -> void:
 		report[model]={"minimum_belt_overlap_pixels":minimum,"worst_case":worst}
 		print("SEAM %s minimum=%d" % [model,minimum])
 	report["checked_combinations"]=total
+	report["maximum_waist_alignment_error"]=maximum_waist_error
 	DirAccess.make_dir_recursive_absolute("res://artifacts")
 	var file:=FileAccess.open("res://artifacts/seams-godot.json",FileAccess.WRITE)
 	file.store_string(JSON.stringify(report,"\t")+"\n")
@@ -77,5 +92,5 @@ func run() -> void:
 		push_error("SEAM FAIL: %d inadequate overlaps, %d combinations" % [failures,total])
 		quit(1)
 	else:
-		print("SEAM PASS: %d combinations; all overlaps >=32 pixels at alpha >64" % total)
+		print("SEAM PASS: %d combinations; all overlaps >=32 pixels and measured waist error <=0.51 pixels" % total)
 		quit(0)

@@ -36,7 +36,7 @@ From source, install Godot 4.3, Make, and Python 3 (standard library only):
 make run       # Launch the title screen
 make editor    # Open the Godot editor
 make test      # Menu, touch, combat, and silhouette checks
-make build     # macOS + Android packages; requires the export toolchain
+make build     # macOS + Android + Linux/Steam Deck packages; requires the export toolchain
 make capture   # Title, mission, and animation review images
 make record    # Gameplay MP4 and small GIF; requires ffmpeg
 make clean     # Delete generated builds and Godot caches
@@ -64,6 +64,25 @@ stays in place when released. Triggers activate above 55% to support Android
 mappings that idle at 50%; disconnecting a controller pauses play and clears firing.
 The title menu includes Quit on Android. Field Orders opens a separate view;
 use Back to Menu, B, Start, or Android Back to close it.
+
+## Combat and options
+
+Hold fire near an enemy to swing the chainsword; outside melee reach, the bolter
+fires normally. L2/Space still throws a grenade and L3/Shift still dashes.
+
+Options offers cursor speeds from 0.5× to 3× (default 1.5×), Wide/Normal/Close
+views, and sound level. Settings persist between launches. Open Options from
+the title menu, or with Y/O while paused. The HUD stays the same size at every view.
+
+Weapon audio is original procedural synthesis: four bolter reports, three grenade
+blasts, two relay collapses, and three chainsword attacks. Separate voice pools
+preserve explosion tails during gunfire. [Audio sources and regeneration](art/audio/README.md).
+
+[Steam Deck installation and Linux export](STEAM-DECK.md). The native Linux x86-64
+release runs without Proton and supports Steam Input's standard Gamepad layout.
+
+The player uses measured pelvis sockets per leg frame and pixel-aligned body
+placement. [Full pose rendering and alignment audit](tools/README-seam-audit.md).
 
 ## Project layout
 

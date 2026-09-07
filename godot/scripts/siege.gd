@@ -49,6 +49,8 @@ var muted := false
 var sfx_volume := 0.8
 var audio_voices: Array[AudioStreamPlayer] = []
 var voice_index := 0
+var effect_voice_index := 8
+var sound_cache: Dictionary = {}
 var audio_rng := RandomNumberGenerator.new()
 var extraction := Vector2(2280,510)
 var smoke_frames := 0
@@ -60,6 +62,11 @@ var grenade_trigger_pressed := false
 var controller_active := false
 const TRIGGER_THRESHOLD := 0.55
 const CURSOR_SPEED := 650.0
+const CURSOR_SPEEDS := [0.5,1.0,1.5,2.0,3.0]
+const VIEW_ZOOMS := {"WIDE":0.75,"NORMAL":1.0,"CLOSE":1.25}
+var cursor_speed_index := 2
+var view_mode := "NORMAL"
+var view_zoom := 1.0
 var controller_cursor := Vector2(565,304)
 var controller_fire_pressed := false
 var at_title := false
@@ -82,13 +89,18 @@ func _ready() -> void:
 			"--screenshot": screenshot_path = args[i + 1]
 			"--mute": muted = true
 			"--validation": test_mode = true
+	load_settings()
 	_install_inputs()
 	controller_active = not Input.get_connected_joypads().is_empty()
 	Input.joy_connection_changed.connect(_controller_connection_changed)
-	for i in range(8):
+	for i in range(16):
 		var voice := AudioStreamPlayer.new()
 		add_child(voice)
 		audio_voices.append(voice)
+	if AudioServer.get_bus_effect_count(0) == 0:
+		var limiter := AudioEffectLimiter.new()
+		limiter.ceiling_db = -1.0
+		AudioServer.add_bus_effect(0,limiter)
 	audio_rng.seed = seed_value + 97
 	reset()
 	if not test_mode and smoke_frames == 0:
@@ -118,6 +130,34 @@ func start_mission() -> void:
 	if not touch_controls.enabled and not test_mode:
 		Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
 
+func load_settings(path: String = "user://settings.cfg") -> void:
+	if path == "user://settings.cfg" and (test_mode or "--validation" in OS.get_cmdline_user_args() or "--smoke-test" in OS.get_cmdline_user_args()):
+		return
+	var config := ConfigFile.new()
+	if config.load(path) == OK:
+		cursor_speed_index = clampi(int(config.get_value("controls","cursor_speed",2)),0,CURSOR_SPEEDS.size()-1)
+		set_view(str(config.get_value("display","view","NORMAL")))
+		sfx_volume = clampf(float(config.get_value("audio","volume",0.8)),0.0,1.0)
+
+func save_settings(path: String = "user://settings.cfg") -> void:
+	if path == "user://settings.cfg" and (test_mode or "--validation" in OS.get_cmdline_user_args()):
+		return
+	var config := ConfigFile.new()
+	config.set_value("controls","cursor_speed",cursor_speed_index)
+	config.set_value("display","view",view_mode)
+	config.set_value("audio","volume",sfx_volume)
+	config.save(path)
+
+func set_view(mode: String) -> void:
+	view_mode = mode if VIEW_ZOOMS.has(mode) else "NORMAL"
+	view_zoom = VIEW_ZOOMS[view_mode]
+	if is_instance_valid(player):
+		camera_offset = Iso.project(player.world_pos)-Vector2(960*0.38,540*0.48)/view_zoom
+		refresh_visuals(0.0)
+
+func world_to_screen(point: Vector2, height: float = 0.0) -> Vector2:
+	return (Iso.project(point)-Vector2(0,height)-camera_offset)*view_zoom
+
 func _bind(action: String, event: InputEvent) -> void:
 	if not InputMap.has_action(action):
 		InputMap.add_action(action,0.2)
@@ -130,7 +170,7 @@ func _install_inputs() -> void:
 		var event := InputEventKey.new()
 		event.physical_keycode = bindings[action]
 		_bind(action,event)
-	var buttons := {"ui_left":JOY_BUTTON_DPAD_LEFT, "ui_right":JOY_BUTTON_DPAD_RIGHT, "ui_up":JOY_BUTTON_DPAD_UP, "ui_down":JOY_BUTTON_DPAD_DOWN, "ui_accept":JOY_BUTTON_A, "ui_cancel":JOY_BUTTON_B, "move_left":JOY_BUTTON_DPAD_LEFT, "move_right":JOY_BUTTON_DPAD_RIGHT, "move_up":JOY_BUTTON_DPAD_UP, "move_down":JOY_BUTTON_DPAD_DOWN, "dash":JOY_BUTTON_LEFT_STICK, "pad_pause":JOY_BUTTON_START, "pad_confirm":JOY_BUTTON_A, "pad_back":JOY_BUTTON_B}
+	var buttons := {"ui_left":JOY_BUTTON_DPAD_LEFT, "ui_right":JOY_BUTTON_DPAD_RIGHT, "ui_up":JOY_BUTTON_DPAD_UP, "ui_down":JOY_BUTTON_DPAD_DOWN, "ui_accept":JOY_BUTTON_A, "ui_cancel":JOY_BUTTON_B, "move_left":JOY_BUTTON_DPAD_LEFT, "move_right":JOY_BUTTON_DPAD_RIGHT, "move_up":JOY_BUTTON_DPAD_UP, "move_down":JOY_BUTTON_DPAD_DOWN, "dash":JOY_BUTTON_LEFT_STICK, "pad_pause":JOY_BUTTON_START, "pad_confirm":JOY_BUTTON_A, "pad_back":JOY_BUTTON_B, "pad_options":JOY_BUTTON_Y}
 	for action: String in buttons:
 		var event := InputEventJoypadButton.new()
 		event.device = -1
@@ -177,7 +217,7 @@ func _input(event: InputEvent) -> void:
 	title_screen.queue_redraw()
 
 func stick_target(direction: Vector2) -> Vector2:
-	return cursor_aim(Iso.project(player.world_pos)-camera_offset-Vector2(0,55)+direction*300)
+	return cursor_aim(world_to_screen(player.world_pos,55)+direction*300)
 
 func reset() -> void:
 	controller_fire_pressed = false
@@ -243,9 +283,9 @@ func reset() -> void:
 	for i in range(mission.fires.size()):
 		var fire := add_effect("fire", Iso.vec(mission.fires[i]))
 		fire.variant = i
-	camera_offset = Iso.project(player.world_pos) - Vector2(960 * 0.38, 540 * 0.48)
+	camera_offset = Iso.project(player.world_pos) - Vector2(960 * 0.38, 540 * 0.48)/view_zoom
 	aim = player.world_pos + Vector2(200,0)
-	controller_cursor = Iso.project(aim)-camera_offset-Vector2(0,55)
+	controller_cursor = world_to_screen(aim,55)
 	for voice in audio_voices:
 		voice.stop()
 		voice.stream_paused = false
@@ -334,7 +374,7 @@ func hit(target: SiegeActor, damage: float) -> void:
 	if target.kind == "barrel":
 		explode(target.world_pos,155,140)
 	elif target.kind == "relay":
-		explode(target.world_pos,120,85)
+		explode(target.world_pos,120,85,"relay")
 		score += 750
 		grenades = mini(9,grenades + 2)
 		shield = minf(60,shield + 25)
@@ -374,7 +414,8 @@ func add_effect(kind: String, pos: Vector2, radius: float = 160.0) -> SiegeEffec
 		matching[0].queue_free()
 	return effect
 
-func explode(pos: Vector2, radius: float = 160.0, damage: float = 140.0) -> void:
+func explode(pos: Vector2, radius: float = 160.0, damage: float = 140.0, sound: String = "grenade") -> void:
+	play_sound(sound,2 if sound == "relay" else 3,0.55)
 	add_effect("explosion",pos,radius)
 	burst(pos,24,Color("ffb142"),240)
 	shake = 10.0
@@ -423,14 +464,53 @@ func eject_casing() -> void:
 	var normal := Vector2(-direction.y,direction.x)
 	casings.append({"pos":player.world_pos + Iso.unproject(port + Vector2(0,55)),"velocity":Iso.unproject(normal * 75 + direction * 15),"age":0.0,"height":55.0,"vz":100.0})
 
-func play_shot() -> void:
+func play_sound(kind: String, variants: int, level_gain: float = 0.45) -> void:
 	if muted or sfx_volume <= 0.0:
 		return
-	var voice := audio_voices[voice_index % audio_voices.size()]
-	voice_index += 1
-	voice.stream = load("res://assets/audio/bolter_%d.wav" % audio_rng.randi_range(0,3))
-	voice.volume_db = linear_to_db(maxf(0.001,sfx_volume))
+	# Reserve separate pools so bolter bursts cannot cut off a long explosion.
+	var gun := kind == "bolter"
+	var index := voice_index%8 if gun else 8+effect_voice_index%8
+	if gun:
+		voice_index += 1
+	else:
+		effect_voice_index += 1
+	var voice := audio_voices[index]
+	var path := "res://assets/audio/%s_%d.wav" % [kind,audio_rng.randi_range(0,variants-1)]
+	if not sound_cache.has(path):
+		sound_cache[path] = load(path)
+	voice.stream = sound_cache[path]
+	voice.volume_db = linear_to_db(maxf(0.001,sfx_volume*level_gain))
 	voice.play()
+
+func play_shot() -> void:
+	play_sound("bolter",4)
+
+func melee_target() -> SiegeActor:
+	var nearest: SiegeActor
+	var distance := INF
+	for enemy in enemies:
+		var d := player.world_pos.distance_to(enemy.world_pos)
+		if enemy.hp<=0 or d>player.radius+enemy.radius+32 or d>=distance:
+			continue
+		var blocked := false
+		for obstacle in cover+relays:
+			if (obstacle.hp>0 or obstacle.remains_solid) and Iso.segment_entry(player.world_pos,enemy.world_pos,obstacle.world_pos,obstacle.radius)>=0:
+				blocked = true
+		if not blocked:
+			nearest = enemy
+			distance = d
+	return nearest
+
+func swing_chainsword(enemy: SiegeActor) -> void:
+	player.cooldown = 0.42
+	player.recoil = 0.0
+	player.melee_time = 0.42
+	player.melee_direction = Iso.project(enemy.world_pos-player.world_pos).normalized()
+	aim_weapon(player,enemy.world_pos)
+	play_sound("chainsword",3,0.48)
+	burst(enemy.world_pos,9,Color("f9c977"),95)
+	hit(enemy,70)
+
 
 func tick(dt: float, movement: Vector2, target: Vector2, shooting: bool, dash: bool) -> void:
 	if state != "playing" or paused:
@@ -443,6 +523,7 @@ func tick(dt: float, movement: Vector2, target: Vector2, shooting: bool, dash: b
 		set(property,maxf(0.0,float(get(property)) - dt))
 	player.flash = maxf(0.0,player.flash-dt)
 	player.recoil = maxf(0.0,player.recoil-dt)
+	player.melee_time = maxf(0.0,player.melee_time-dt)
 	player.cooldown = maxf(0.0,player.cooldown-dt)
 	if hurt_timer == 0.0:
 		shield = minf(60.0,shield + dt * 3.0)
@@ -458,7 +539,10 @@ func tick(dt: float, movement: Vector2, target: Vector2, shooting: bool, dash: b
 		traveled += move_actor(player,dash_direction * 500 * dt)
 	player.moving = traveled > 0.001
 	aim_weapon(player,aim)
-	if shooting and player.cooldown <= 0.0:
+	var close_enemy := melee_target() if shooting else null
+	if shooting and player.cooldown<=0.0 and close_enemy != null:
+		swing_chainsword(close_enemy)
+	elif shooting and player.cooldown <= 0.0:
 		player.cooldown = 0.105
 		player.recoil = 0.105
 		fire_weapon(player,aim,950,24)
@@ -484,7 +568,7 @@ func tick(dt: float, movement: Vector2, target: Vector2, shooting: bool, dash: b
 	update_transients(dt)
 	if boss_defeated and player.world_pos.distance_to(extraction) < 80.0 and state == "playing":
 		state = "won"
-	var camera_target := Iso.project(player.world_pos) - Vector2(960 * 0.38,540 * 0.48)
+	var camera_target := Iso.project(player.world_pos) - Vector2(960 * 0.38,540 * 0.48)/view_zoom
 	camera_offset = camera_offset.lerp(camera_target,1.0-exp(-dt*7))
 	shake *= exp(-dt*15)
 
@@ -604,19 +688,21 @@ func update_transients(dt: float) -> void:
 			pickups.remove_at(i)
 
 func cursor_aim(cursor: Vector2) -> Vector2:
+	cursor = cursor/view_zoom+camera_offset
 	var targets: Array = enemies + relays
 	targets.sort_custom(func(a: SiegeActor,b: SiegeActor) -> bool: return a.world_pos.x+a.world_pos.y > b.world_pos.x+b.world_pos.y)
 	for actor: SiegeActor in targets:
 		if actor.hp <= 0.0:
 			continue
-		var foot := Iso.project(actor.world_pos)-camera_offset
+		var foot := Iso.project(actor.world_pos)
 		var height: float = 150 if actor.kind == "relay" else PoseLibrary.SIZES[actor.kind].y
 		if Rect2(foot-Vector2(actor.radius,height),Vector2(actor.radius*2,height)).has_point(cursor):
 			return actor.world_pos
-	return Iso.unproject(cursor+camera_offset+Vector2(0,55))
+	return Iso.unproject(cursor+Vector2(0,55))
 
 func refresh_visuals(dt: float) -> void:
-	world.position = -(camera_offset + Vector2(sin(time*83),cos(time*71))*shake).round()
+	world.scale = Vector2.ONE*view_zoom
+	world.position = -(camera_offset + Vector2(sin(time*83),cos(time*71))*shake).round()*view_zoom
 	for actor: SiegeActor in cover + relays + enemies + [player]:
 		var illumination := 0.0
 		for effect in effects:
@@ -650,7 +736,7 @@ func _physics_process(dt: float) -> void:
 	if controller_active:
 		var stick := Input.get_vector("aim_left","aim_right","aim_up","aim_down",0.2)
 		if not paused and state == "playing":
-			controller_cursor += stick * CURSOR_SPEED * dt
+			controller_cursor += stick * CURSOR_SPEED * CURSOR_SPEEDS[cursor_speed_index] * dt
 			controller_cursor = controller_cursor.clamp(Vector2(12,12),get_viewport_rect().size-Vector2(12,12))
 		target = cursor_aim(controller_cursor)
 		shooting = controller_fire_pressed
@@ -681,6 +767,13 @@ func finish_smoke() -> void:
 	get_tree().quit()
 
 func _unhandled_input(event: InputEvent) -> void:
+	if title_screen.show_options:
+		if event.is_action_pressed("pad_back") or event.is_action_pressed("pad_pause") or (event is InputEventKey and event.pressed and event.physical_keycode == KEY_ESCAPE):
+			title_screen.close_options()
+		return
+	if not at_title and paused and (event.is_action_pressed("pad_options") or (event is InputEventKey and event.pressed and event.physical_keycode == KEY_O)):
+		title_screen.open_options()
+		return
 	if event is InputEventJoypadButton and event.pressed:
 		if at_title:
 			if event.is_action_pressed("pad_pause"):
@@ -740,7 +833,9 @@ func toggle_pause() -> void:
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_GO_BACK_REQUEST and is_instance_valid(player):
-		if at_title and title_screen.show_orders:
+		if title_screen.show_options:
+			title_screen.close_options()
+		elif at_title and title_screen.show_orders:
 			title_screen.close_orders()
 		elif not at_title:
 			toggle_pause()

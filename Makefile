@@ -12,7 +12,7 @@ export GODOT_BIN JAVA_HOME ANDROID_HOME
 
 .PHONY: help import run editor test build capture record import-props clean
 help:
-	@printf '%s\n' 'make run      Launch the game' 'make editor   Open Godot' 'make test     Validate menu, touch, combat and silhouettes' 'make build    Build and verify macOS + Android packages (macOS host)' 'make capture  Render title and review screenshots' 'make record   Record gameplay MP4 and a small GIF (requires ffmpeg)' 'make clean    Remove generated builds and Godot caches' '' 'Overrides: GODOT_BIN, JAVA_HOME, ANDROID_HOME, PYTHON' 'Example: make run GAME_ARGS="--mute --touch"'
+	@printf '%s\n' 'make run      Launch the game' 'make editor   Open Godot' 'make test     Validate menu, touch, combat and silhouettes' 'make build    Build and verify macOS + Android + Linux packages (macOS host)' 'make capture  Render title and review screenshots' 'make record   Record gameplay MP4 and a small GIF (requires ffmpeg)' 'make clean    Remove generated builds and Godot caches' '' 'Overrides: GODOT_BIN, JAVA_HOME, ANDROID_HOME, PYTHON' 'Example: make run GAME_ARGS="--mute --touch"'
 
 import:
 	@"$(PYTHON)" tools/validate_godot.py --import-only
