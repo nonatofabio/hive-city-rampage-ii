@@ -47,13 +47,19 @@ Set tool paths in ignored `Makefile.local` or on the command line, for example
 `make run GODOT_BIN=/path/to/Godot`. See [BUILDING.md](BUILDING.md) for export setup.
 You can also open `godot/project.godot` directly in Godot; Python is not a game runtime dependency.
 
-| Action | Desktop | Android |
-| --- | --- | --- |
-| Move | WASD | Left stick |
-| Aim / fire | Mouse / left click | Right stick |
-| Grenade | Space / right click | FRAG |
-| Dash | Shift | DASH |
-| Pause | Escape | PAUSE |
+| Action | Desktop | Android touchscreen | Controller |
+| --- | --- | --- | --- |
+| Move | WASD | Left virtual stick | Left stick / D-pad |
+| Aim / fire | Mouse / left click | Right virtual stick | Right stick (aim + fire), R2 (fire) |
+| Grenade | Space / right click | FRAG | L1 |
+| Dash | Shift | DASH | R1 |
+| Pause | Escape | PAUSE | Start |
+
+Physical gamepads work on Android and desktop alongside touchscreen controls.
+Use the D-pad and A to navigate menus, or Start to deploy. On the pause/result
+screen, A resumes, retries, or advances to Iron Belly; B returns to the menu.
+Button names follow the standard Xbox layout (Retroid labels may vary with its
+controller mode). Sticks use a 20% dead zone; disconnecting a controller pauses play.
 
 ## Project layout
 

@@ -56,6 +56,8 @@ var frame_number := 0
 var screenshot_path := ""
 var capture_pending := false
 var test_mode := false
+var controller_active := false
+var controller_aim := Vector2.RIGHT
 var at_title := false
 var seed_value := 7
 @onready var world: Node2D = $World
@@ -77,6 +79,8 @@ func _ready() -> void:
 			"--mute": muted = true
 			"--validation": test_mode = true
 	_install_inputs()
+	controller_active = not Input.get_connected_joypads().is_empty()
+	Input.joy_connection_changed.connect(_controller_connection_changed)
 	for i in range(8):
 		var voice := AudioStreamPlayer.new()
 		add_child(voice)
@@ -96,6 +100,7 @@ func show_title() -> void:
 	touch_controls.clear_touches()
 	title_screen.show()
 	title_screen.sync_level()
+	title_screen.deploy.grab_focus()
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 func start_mission() -> void:
@@ -107,16 +112,55 @@ func start_mission() -> void:
 	if not touch_controls.enabled and not test_mode:
 		Input.mouse_mode = Input.MOUSE_MODE_HIDDEN
 
+func _bind(action: String, event: InputEvent) -> void:
+	if not InputMap.has_action(action):
+		InputMap.add_action(action,0.2)
+	if not InputMap.action_has_event(action,event):
+		InputMap.action_add_event(action,event)
+
 func _install_inputs() -> void:
 	var bindings := {"move_left":KEY_A, "move_right":KEY_D, "move_up":KEY_W, "move_down":KEY_S, "dash":KEY_SHIFT, "grenade":KEY_SPACE}
 	for action: String in bindings:
-		if not InputMap.has_action(action):
-			InputMap.add_action(action)
-			var event := InputEventKey.new()
-			event.physical_keycode = bindings[action]
-			InputMap.action_add_event(action, event)
+		var event := InputEventKey.new()
+		event.physical_keycode = bindings[action]
+		_bind(action,event)
+	var buttons := {"ui_left":JOY_BUTTON_DPAD_LEFT, "ui_right":JOY_BUTTON_DPAD_RIGHT, "ui_up":JOY_BUTTON_DPAD_UP, "ui_down":JOY_BUTTON_DPAD_DOWN, "ui_accept":JOY_BUTTON_A, "ui_cancel":JOY_BUTTON_B, "move_left":JOY_BUTTON_DPAD_LEFT, "move_right":JOY_BUTTON_DPAD_RIGHT, "move_up":JOY_BUTTON_DPAD_UP, "move_down":JOY_BUTTON_DPAD_DOWN, "dash":JOY_BUTTON_RIGHT_SHOULDER, "grenade":JOY_BUTTON_LEFT_SHOULDER, "pad_pause":JOY_BUTTON_START, "pad_confirm":JOY_BUTTON_A, "pad_back":JOY_BUTTON_B}
+	for action: String in buttons:
+		var event := InputEventJoypadButton.new()
+		event.device = -1
+		event.button_index = buttons[action]
+		_bind(action,event)
+	for binding: Array in [["move_left",JOY_AXIS_LEFT_X,-1.0],["move_right",JOY_AXIS_LEFT_X,1.0],["move_up",JOY_AXIS_LEFT_Y,-1.0],["move_down",JOY_AXIS_LEFT_Y,1.0],["aim_left",JOY_AXIS_RIGHT_X,-1.0],["aim_right",JOY_AXIS_RIGHT_X,1.0],["aim_up",JOY_AXIS_RIGHT_Y,-1.0],["aim_down",JOY_AXIS_RIGHT_Y,1.0],["pad_fire",JOY_AXIS_TRIGGER_RIGHT,1.0]]:
+		var event := InputEventJoypadMotion.new()
+		event.device = -1
+		event.axis = binding[1]
+		event.axis_value = binding[2]
+		_bind(binding[0],event)
+
+func _controller_connection_changed(_device: int, connected: bool) -> void:
+	controller_active = not Input.get_connected_joypads().is_empty()
+	if not connected:
+		toggle_pause_if_playing()
+	if at_title:
+		title_screen.deploy.grab_focus()
+	title_screen.queue_redraw()
+
+func toggle_pause_if_playing() -> void:
+	if not paused and state == "playing" and not at_title:
+		toggle_pause()
+
+func _input(event: InputEvent) -> void:
+	if (event is InputEventJoypadButton and event.pressed) or (event is InputEventJoypadMotion and absf(event.axis_value)>0.2):
+		controller_active = true
+	elif event is InputEventScreenTouch or event is InputEventScreenDrag or event is InputEventKey or (event is InputEventMouseMotion and event.relative.length()>1.0):
+		controller_active = false
+	title_screen.queue_redraw()
+
+func stick_target(direction: Vector2) -> Vector2:
+	return cursor_aim(Iso.project(player.world_pos)-camera_offset-Vector2(0,55)+direction*300)
 
 func reset() -> void:
+	controller_aim = Vector2.RIGHT
 	capture_progress = [0.0,0.0,0.0]
 	hazard_cooldown = 0.0
 	boss_salvo = 0.0
@@ -578,10 +622,16 @@ func _physics_process(dt: float) -> void:
 	var dash := Input.is_action_pressed("dash")
 	if touch_controls.enabled:
 		movement = (movement + touch_controls.movement()).limit_length(1.0)
-		var screen_target: Vector2 = Iso.project(player.world_pos)-camera_offset-Vector2(0,55)+touch_controls.aim_direction*300
-		target = cursor_aim(screen_target)
-		shooting = touch_controls.firing()
+		if not controller_active:
+			target = stick_target(touch_controls.aim_direction)
+			shooting = touch_controls.firing()
 		dash = dash or touch_controls.consume_dash()
+	if controller_active:
+		var stick := Input.get_vector("aim_left","aim_right","aim_up","aim_down",0.2)
+		if stick != Vector2.ZERO:
+			controller_aim = stick.normalized()
+		target = stick_target(controller_aim)
+		shooting = stick != Vector2.ZERO or Input.is_action_pressed("pad_fire")
 	if smoke_frames > 0:
 		movement = Vector2(cos(frame_number*0.015),sin(frame_number*0.015))
 		target = enemies[0].world_pos if not enemies.is_empty() else relays[0].world_pos
@@ -609,6 +659,27 @@ func finish_smoke() -> void:
 	get_tree().quit()
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventJoypadButton and event.pressed:
+		if at_title:
+			if event.is_action_pressed("pad_pause"):
+				start_mission()
+			elif event.is_action_pressed("pad_back") and title_screen.show_orders:
+				title_screen.toggle_orders()
+		elif event.is_action_pressed("pad_pause"):
+			toggle_pause()
+		elif event.is_action_pressed("pad_confirm") and (paused or state != "playing"):
+			if state != "playing":
+				if state == "won" and level == 1:
+					level = 2
+				reset()
+			else:
+				toggle_pause()
+		elif event.is_action_pressed("pad_back") and (paused or state != "playing"):
+			show_title()
+		elif event.is_action_pressed("grenade"):
+			var stick := Input.get_vector("aim_left","aim_right","aim_up","aim_down",0.2)
+			grenade(stick_target(stick.normalized() if stick != Vector2.ZERO else controller_aim))
+		return
 	if at_title:
 		return
 	if event is InputEventKey and event.pressed and not event.echo:
