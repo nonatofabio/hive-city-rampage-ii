@@ -64,6 +64,8 @@ You can also open `godot/project.godot` directly in Godot; Python is not a game 
 
 ## Origins and credits
 
+Read the development write-up: [AI-generated pixel art needs a build system, not better prompts](https://dev.to/nonatofabio_28/ai-generated-pixel-art-needs-a-build-system-not-better-prompts-280c).
+
 Sequel to [Hive City Rampage](https://github.com/nonatofabio/hive-city-rampage).
 The original top-down Pygame game credits Claude; its README/screenshots commit
 `3f5f993` names Claude Opus 4.5, while the gameplay commits do not specify a model.
