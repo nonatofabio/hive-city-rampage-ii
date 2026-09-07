@@ -18,8 +18,7 @@ and runs directly on SteamOS; leave forced Proton compatibility disabled.
    and sound level. While paused, Y opens Options.
 
 Keep the default 1280×800 display mode; the 16:9 game view is letterboxed while
-menus remain readable. For trackpad aiming, you can optionally map the right
-trackpad to Mouse, but start with the Gamepad template for the built-in sticks.
+menus remain readable. Use the Gamepad template for the built-in sticks.
 
 ## Build from source
 
