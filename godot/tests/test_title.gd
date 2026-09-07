@@ -19,7 +19,14 @@ func run() -> void:
 	check(game.time == 0.0,"Mission must not advance behind title")
 	game.title_screen.toggle_orders()
 	check(game.title_screen.show_orders,"Field orders open")
-	game.title_screen.toggle_orders()
+	check(game.title_screen.close_button.visible and root.gui_get_focus_owner() == game.title_screen.close_button,"Orders focuses its close button")
+	for button: Button in [game.title_screen.deploy,game.title_screen.level_button,game.title_screen.audio,game.title_screen.orders_button,game.title_screen.quit_button]:
+		check(not button.visible,"Orders hides underlying menu buttons")
+	if DisplayServer.get_name() != "headless":
+		await RenderingServer.frame_post_draw
+		root.get_texture().get_image().save_png("res://artifacts/field-orders.png")
+	game._notification(Node.NOTIFICATION_WM_GO_BACK_REQUEST)
+	check(not game.title_screen.show_orders and game.title_screen.quit_button.visible,"Android Back closes orders and restores Quit")
 	var muted := game.muted
 	game.title_screen.toggle_audio()
 	check(game.muted != muted,"Audio toggle persists into deployment")

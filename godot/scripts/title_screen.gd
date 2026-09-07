@@ -8,15 +8,19 @@ var show_orders := false
 var deploy: Button
 var audio: Button
 var level_button: Button
+var orders_button: Button
+var quit_button: Button
+var close_button: Button
 
 func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	level_button = make_button("MISSION: ASHGATE",Rect2(330,285,300,36),select_level)
 	deploy = make_button("DEPLOY TO ASHGATE",Rect2(330,339,300,44),game.start_mission)
-	make_button("FIELD ORDERS",Rect2(330,393,145,36),toggle_orders)
+	orders_button = make_button("FIELD ORDERS",Rect2(330,393,145,36),toggle_orders)
 	audio = make_button("AUDIO: ON",Rect2(485,393,145,36),toggle_audio)
-	if not OS.has_feature("android"):
-		make_button("QUIT",Rect2(430,442,100,30),func(): get_tree().quit())
+	quit_button = make_button("QUIT",Rect2(430,442,100,30),quit_game)
+	close_button = make_button("BACK TO MENU",Rect2(355,355,250,40),close_orders)
+	close_button.hide()
 	visibility_changed.connect(func():
 		if visible:
 			audio.text = "AUDIO: OFF" if game.muted else "AUDIO: ON"
@@ -46,8 +50,22 @@ func toggle_audio() -> void:
 	audio.text = "AUDIO: OFF" if game.muted else "AUDIO: ON"
 
 func toggle_orders() -> void:
-	show_orders = not show_orders
+	set_orders(not show_orders)
+
+func close_orders() -> void:
+	set_orders(false)
+
+func set_orders(open: bool) -> void:
+	show_orders = open
+	for button: Button in [level_button,deploy,orders_button,audio,quit_button]:
+		button.visible = not open
+	close_button.visible = open
+	if is_visible_in_tree():
+		(close_button if open else orders_button).grab_focus()
 	queue_redraw()
+
+func quit_game() -> void:
+	get_tree().quit()
 
 func centered(value: String, y: float, font: Font, size: int, color: Color) -> void:
 	var width := font.get_string_size(value,HORIZONTAL_ALIGNMENT_LEFT,-1,size).x
@@ -60,6 +78,9 @@ func _draw() -> void:
 	for x in [34,926]:
 		for y in [34,506]:
 			draw_circle(Vector2(x,y),2,GOLD)
+	if show_orders:
+		draw_orders()
+		return
 	centered("N O N A T O F A B I O   P R E S E N T S",60,BODY_FONT,14,Color("a5a398"))
 	draw_line(Vector2(240,84),Vector2(437,84),GOLD)
 	draw_line(Vector2(523,84),Vector2(720,84),GOLD)
@@ -72,22 +93,6 @@ func _draw() -> void:
 	draw_line(Vector2(526,262),Vector2(650,262),Color("796341"))
 
 	centered("SECURE THE PUMPS. BREAK THE WAAAGH." if game.level == 2 else "THREE RELAYS. ONE SIEGE WALKER. NO RETREAT.",495,BODY_FONT,14,Color("a49b86"))
-	if show_orders:
-		draw_rect(Rect2(170,110,620,215),Color("10161b"))
-		draw_rect(Rect2(170,110,620,215),GOLD,false,1)
-		centered("FIELD ORDERS",151,DISPLAY_FONT,26,GOLD)
-		centered("Hold three pumps for 8 seconds. Defeat the Ork Warboss." if game.level == 2 else "Destroy three signal relays. Eliminate the siege walker.",191,BODY_FONT,20,Color("dfd7c4"))
-		centered("Reach extraction. Survive the streets of Ashgate.",216,BODY_FONT,20,Color("dfd7c4"))
-		var controls := "WASD  Move     Mouse  Aim     LMB  Fire     ESC  Pause"
-		var actions := "SPACE / RMB  Frag     SHIFT  Dash"
-		if game.touch_controls.enabled:
-			controls = "Left stick  Move     Right stick  Aim + fire"
-			actions = "Tap FRAG, DASH or PAUSE for tactical actions"
-		if game.controller_active:
-			controls = "Left stick / D-pad  Move     Right stick  Aim"
-			actions = "L2  Frag     L3  Dash     R2  Fire     START  Pause"
-		centered(controls,264,BODY_FONT,18,GOLD)
-		centered(actions,291,BODY_FONT,18,GOLD)
 
 func select_level() -> void:
 	game.level = 2 if game.level == 1 else 1
@@ -99,3 +104,20 @@ func sync_level() -> void:
 	level_button.text = "MISSION: IRON BELLY" if game.level == 2 else "MISSION: ASHGATE"
 	deploy.text = "DEPLOY TO IRON BELLY" if game.level == 2 else "DEPLOY TO ASHGATE"
 	queue_redraw()
+
+func draw_orders() -> void:
+	draw_rect(Rect2(130,100,700,310),Color("10161b"))
+	draw_rect(Rect2(130,100,700,310),GOLD,false,1)
+	centered("FIELD ORDERS",151,DISPLAY_FONT,26,GOLD)
+	centered("Hold three pumps for 8 seconds. Defeat the Ork Warboss." if game.level == 2 else "Destroy three signal relays. Eliminate the siege walker.",191,BODY_FONT,20,Color("dfd7c4"))
+	centered("Reach extraction. Survive the streets of Ashgate.",216,BODY_FONT,20,Color("dfd7c4"))
+	var controls := "WASD  Move     Mouse  Aim     LMB  Fire     ESC  Pause"
+	var actions := "SPACE / RMB  Frag     SHIFT  Dash"
+	if game.touch_controls.enabled:
+		controls = "Left stick  Move     Right stick  Aim + fire"
+		actions = "Tap FRAG, DASH or PAUSE for tactical actions"
+	if game.controller_active:
+		controls = "Left stick / D-pad  Move     Right stick  Cursor"
+		actions = "L2  Frag     L3  Dash     R2  Fire     START  Pause"
+	centered(controls,264,BODY_FONT,18,GOLD)
+	centered(actions,291,BODY_FONT,18,GOLD)

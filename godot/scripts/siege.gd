@@ -58,7 +58,10 @@ var capture_pending := false
 var test_mode := false
 var grenade_trigger_pressed := false
 var controller_active := false
-var controller_aim := Vector2.RIGHT
+const TRIGGER_THRESHOLD := 0.55
+const CURSOR_SPEED := 650.0
+var controller_cursor := Vector2(565,304)
+var controller_fire_pressed := false
 var at_title := false
 var seed_value := 7
 @onready var world: Node2D = $World
@@ -95,10 +98,12 @@ func _ready() -> void:
 
 func show_title() -> void:
 	at_title = true
+	controller_fire_pressed = false
 	paused = false
 	hud.hide()
 	touch_controls.hide()
 	touch_controls.clear_touches()
+	title_screen.close_orders()
 	title_screen.show()
 	title_screen.sync_level()
 	title_screen.deploy.grab_focus()
@@ -137,11 +142,15 @@ func _install_inputs() -> void:
 		event.axis = binding[1]
 		event.axis_value = binding[2]
 		_bind(binding[0],event)
+	# Android full-axis mappings can normalize a released trigger to 0.5.
+	for action: String in ["pad_fire","pad_grenade"]:
+		InputMap.action_set_deadzone(action,TRIGGER_THRESHOLD)
 
 func _controller_connection_changed(_device: int, connected: bool) -> void:
 	controller_active = not Input.get_connected_joypads().is_empty()
 	if not connected:
 		grenade_trigger_pressed = false
+		controller_fire_pressed = false
 		toggle_pause_if_playing()
 	if at_title:
 		title_screen.deploy.grab_focus()
@@ -152,17 +161,18 @@ func toggle_pause_if_playing() -> void:
 		toggle_pause()
 
 func _input(event: InputEvent) -> void:
-	if (event is InputEventJoypadButton and event.pressed) or (event is InputEventJoypadMotion and absf(event.axis_value)>0.2):
+	if (event is InputEventJoypadButton and event.pressed) or (event is InputEventJoypadMotion and absf(event.axis_value)>(TRIGGER_THRESHOLD if event.axis in [JOY_AXIS_TRIGGER_LEFT,JOY_AXIS_TRIGGER_RIGHT] else 0.2)):
 		controller_active = true
 	elif event is InputEventScreenTouch or event is InputEventScreenDrag or event is InputEventKey or (event is InputEventMouseMotion and event.relative.length()>1.0):
 		controller_active = false
+	if event is InputEventJoypadMotion and event.axis == JOY_AXIS_TRIGGER_RIGHT:
+		controller_fire_pressed = event.axis_value > TRIGGER_THRESHOLD and not paused and not at_title and state == "playing"
 	# Analog triggers emit repeated motion events while held. Throw only on
 	# crossing the dead zone, and require release before another grenade.
 	if event is InputEventJoypadMotion and event.axis == JOY_AXIS_TRIGGER_LEFT:
 		var pressed: bool = event.axis_value > InputMap.action_get_deadzone("pad_grenade")
 		if pressed and not grenade_trigger_pressed and not at_title:
-			var stick := Input.get_vector("aim_left","aim_right","aim_up","aim_down",0.2)
-			grenade(stick_target(stick.normalized() if stick != Vector2.ZERO else controller_aim))
+			grenade(cursor_aim(controller_cursor))
 		grenade_trigger_pressed = pressed
 	title_screen.queue_redraw()
 
@@ -170,7 +180,7 @@ func stick_target(direction: Vector2) -> Vector2:
 	return cursor_aim(Iso.project(player.world_pos)-camera_offset-Vector2(0,55)+direction*300)
 
 func reset() -> void:
-	controller_aim = Vector2.RIGHT
+	controller_fire_pressed = false
 	capture_progress = [0.0,0.0,0.0]
 	hazard_cooldown = 0.0
 	boss_salvo = 0.0
@@ -235,6 +245,7 @@ func reset() -> void:
 		fire.variant = i
 	camera_offset = Iso.project(player.world_pos) - Vector2(960 * 0.38, 540 * 0.48)
 	aim = player.world_pos + Vector2(200,0)
+	controller_cursor = Iso.project(aim)-camera_offset-Vector2(0,55)
 	for voice in audio_voices:
 		voice.stop()
 		voice.stream_paused = false
@@ -638,10 +649,11 @@ func _physics_process(dt: float) -> void:
 		dash = dash or touch_controls.consume_dash()
 	if controller_active:
 		var stick := Input.get_vector("aim_left","aim_right","aim_up","aim_down",0.2)
-		if stick != Vector2.ZERO:
-			controller_aim = stick.normalized()
-		target = stick_target(controller_aim)
-		shooting = Input.is_action_pressed("pad_fire")
+		if not paused and state == "playing":
+			controller_cursor += stick * CURSOR_SPEED * dt
+			controller_cursor = controller_cursor.clamp(Vector2(12,12),get_viewport_rect().size-Vector2(12,12))
+		target = cursor_aim(controller_cursor)
+		shooting = controller_fire_pressed
 	if smoke_frames > 0:
 		movement = Vector2(cos(frame_number*0.015),sin(frame_number*0.015))
 		target = enemies[0].world_pos if not enemies.is_empty() else relays[0].world_pos
@@ -672,7 +684,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventJoypadButton and event.pressed:
 		if at_title:
 			if event.is_action_pressed("pad_pause"):
-				start_mission()
+				if title_screen.show_orders:
+					title_screen.close_orders()
+				else:
+					start_mission()
 			elif event.is_action_pressed("pad_back") and title_screen.show_orders:
 				title_screen.toggle_orders()
 		elif event.is_action_pressed("pad_pause"):
@@ -718,15 +733,20 @@ func toggle_pause() -> void:
 	if state != "playing" or at_title:
 		return
 	paused = not paused
+	controller_fire_pressed = false
 	touch_controls.clear_touches()
 	for voice in audio_voices:
 		voice.stream_paused = paused
 
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_WM_GO_BACK_REQUEST and is_instance_valid(player) and not at_title:
-		toggle_pause()
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST and is_instance_valid(player):
+		if at_title and title_screen.show_orders:
+			title_screen.close_orders()
+		elif not at_title:
+			toggle_pause()
 	if what in [NOTIFICATION_WM_WINDOW_FOCUS_OUT,NOTIFICATION_APPLICATION_PAUSED] and is_instance_valid(player) and state == "playing" and not at_title and smoke_frames == 0 and not test_mode:
 		paused = true
+		controller_fire_pressed = false
 		touch_controls.clear_touches()
 		for voice in audio_voices:
 			voice.stream_paused = true

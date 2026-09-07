@@ -50,7 +50,7 @@ You can also open `godot/project.godot` directly in Godot; Python is not a game 
 | Action | Desktop | Android touchscreen | Controller |
 | --- | --- | --- | --- |
 | Move | WASD | Left virtual stick | Left stick / D-pad |
-| Aim / fire | Mouse / left click | Right virtual stick | Right stick (aim), R2 (fire) |
+| Aim / fire | Mouse / left click | Right virtual stick | Right stick (move cursor), R2 (fire) |
 | Grenade | Space / right click | FRAG | L2 |
 | Dash | Shift | DASH | Left stick click (L3) |
 | Pause | Escape | PAUSE | Start |
@@ -59,7 +59,11 @@ Physical gamepads work on Android and desktop alongside touchscreen controls.
 Use the D-pad and A to navigate menus, or Start to deploy. On the pause/result
 screen, A resumes, retries, or advances to Iron Belly; B returns to the menu.
 Button names follow the standard Xbox layout (Retroid labels may vary with its
-controller mode). Sticks use a 20% dead zone; disconnecting a controller pauses play.
+controller mode). Sticks use a 20% dead zone. The right stick moves a free screen cursor, which
+stays in place when released. Triggers activate above 55% to support Android
+mappings that idle at 50%; disconnecting a controller pauses play and clears firing.
+The title menu includes Quit on Android. Field Orders opens a separate view;
+use Back to Menu, B, Start, or Android Back to close it.
 
 ## Project layout
 

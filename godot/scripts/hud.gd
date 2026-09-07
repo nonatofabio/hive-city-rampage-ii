@@ -86,7 +86,7 @@ func _draw() -> void:
 	if game.combo_timer > 0.0 and game.combo > 1:
 		text("%d KILL CHAIN  x%d" % [game.combo,mini(5,game.combo)],Vector2(18,98),Color("f9b850"))
 	if game.state == "playing" and not game.paused:
-		var p := Iso.project(game.aim)-game.camera_offset-Vector2(0,55)
+		var p: Vector2 = game.controller_cursor if game.controller_active else Iso.project(game.aim)-game.camera_offset-Vector2(0,55)
 		draw_circle(p,7,Color("ebcf95"),false)
 		for d: Vector2 in [Vector2.LEFT,Vector2.RIGHT,Vector2.UP,Vector2.DOWN]:
 			draw_line(p+d*8,p+d*12,Color("ebcf95"))
