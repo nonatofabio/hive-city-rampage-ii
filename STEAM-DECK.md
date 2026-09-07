@@ -3,7 +3,7 @@
 Use the native Linux x86-64 package. It embeds the game data into the executable
 and runs directly on SteamOS; leave forced Proton compatibility disabled.
 
-1. In Desktop Mode, download `Hive-City-Rampage-II-0.4.0-Linux-SteamDeck.tar.gz`
+1. In Desktop Mode, download `Hive-City-Rampage-II-0.4.1-Linux-SteamDeck.tar.gz`
    from the GitHub release and extract it into a permanent folder such as
    `/home/deck/Games/` (not a temporary download preview).
 2. In Steam, choose **Add a Game → Add a Non-Steam Game → Browse** and select

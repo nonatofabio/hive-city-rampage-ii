@@ -21,7 +21,7 @@ def tone(t, start, end, decay):
 
 def design(kind, variant):
     rng = np.random.default_rng(1701 + variant + 100 * ['bolter','grenade','relay','chainsword'].index(kind))
-    duration = {'bolter':.48,'grenade':1.9,'relay':2.5,'chainsword':.48}[kind]
+    duration = {'bolter':.48,'grenade':1.9,'relay':2.5,'chainsword':.36}[kind]
     t = np.arange(int(duration * RATE)) / RATE
     if kind == 'bolter':
         # Sharp pressure crack, heavy low-mid punch, breech cycling after report.
@@ -46,19 +46,26 @@ def design(kind, variant):
             freq = rng.uniform(280,2400)
             x += (t>=delay)*.13*(np.sin(2*np.pi*freq*u)+.6*noise(t,rng,3000))*np.exp(-u/.07)
     else:
-        # Teeth engaging under load, motor pitch sag, short rasp rather than a gunshot.
-        phase = 2*np.pi*(125*t + 20*.07*(1-np.exp(-t/.07)))
-        buzz = sum(np.sin(phase*h)/h for h in range(1,14))
-        env = np.minimum(1,t/.018)*np.minimum(1,(duration-t)/.08)
-        x = (.25*buzz + .15*noise(t,rng,4500)) * env
-        x += .22*noise(t,rng,6500)*np.exp(-np.maximum(0,t-.08)/.035)*(t>=.08)
+        # A brief motor rev under cutting load. Irregular combustion pulses
+        # modulate colored noise rather than sustaining a pitched sawtooth chord.
+        rpm = 75 + 75*(1-np.exp(-t/.035)) - 70*np.clip((t-.16)/.20,0,1)
+        phase = 2*np.pi*np.cumsum(rpm+noise(t,rng,45)*7)/RATE
+        chug = .55+.45*np.maximum(0,np.sin(phase))**3
+        rev = (1-np.exp(-t/.016))*np.minimum(1,(duration-t)/.095)
+        load = np.exp(-((t-.12)/.065)**2)
+        body = .30*noise(t,rng,650)*chug
+        rasp = .12*noise(t,rng,2600)*(.25+.75*load)
+        x = (body+rasp)*rev
+        # Dry bite and a short mechanical run-down, with no ringing tail.
+        u = np.maximum(0,t-.055)
+        x += .13*noise(t,rng,4800)*np.exp(-u/.022)*(t>=.055)
     if kind in ['grenade','relay']:
         for delay in rng.uniform(.12, min(1.3,duration-.3), 18):
             u = np.maximum(0,t-delay)
             x += (t>=delay)*rng.uniform(.015,.07)*noise(t,rng,6500)*np.exp(-u/.013)
     # Small, asymmetric room reflections; hard ending avoided with a fade.
     stereo = np.column_stack([x,x])
-    for channel, delays in enumerate([[.029,.071,.113],[.037,.083,.139]]):
+    for channel, delays in enumerate([[],[]] if kind=='chainsword' else [[.029,.071,.113],[.037,.083,.139]]):
         for i, delay in enumerate(delays):
             n = int(delay*RATE)
             stereo[n:,channel] += x[:-n] * (.12 / (i+1))

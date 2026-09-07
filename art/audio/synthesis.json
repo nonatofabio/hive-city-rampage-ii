@@ -45,18 +45,18 @@
     "rms_dbfs": -18.86466473016062
   },
   "chainsword_0.wav": {
-    "seconds": 0.48,
+    "seconds": 0.36,
     "peak_dbfs": -1.7237229523256667,
-    "rms_dbfs": -11.598905928912718
+    "rms_dbfs": -12.728142398445224
   },
   "chainsword_1.wav": {
-    "seconds": 0.48,
+    "seconds": 0.36,
     "peak_dbfs": -1.7237229523256667,
-    "rms_dbfs": -11.249034398438125
+    "rms_dbfs": -13.303768811427615
   },
   "chainsword_2.wav": {
-    "seconds": 0.48,
+    "seconds": 0.36,
     "peak_dbfs": -1.7237229523256667,
-    "rms_dbfs": -11.192132399240514
+    "rms_dbfs": -13.30408482177959
   }
 }

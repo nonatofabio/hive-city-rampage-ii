@@ -36,11 +36,11 @@ func run() -> void:
 		root.get_texture().get_image().save_png("res://artifacts/title-screen.png")
 	# Route actual GUI mouse events through the viewport, rather than emitting a signal.
 	var motion := InputEventMouseMotion.new()
-	motion.position = Vector2(480,360)
+	motion.position = game.title_screen.deploy.get_global_rect().get_center()
 	root.push_input(motion,true)
 	for pressed in [true,false]:
 		var event := InputEventMouseButton.new()
-		event.position = Vector2(480,360)
+		event.position = game.title_screen.deploy.get_global_rect().get_center()
 		event.button_index = MOUSE_BUTTON_LEFT
 		event.pressed = pressed
 		event.button_mask = MOUSE_BUTTON_MASK_LEFT if pressed else 0
@@ -53,7 +53,7 @@ func run() -> void:
 	for pressed in [true,false]:
 		var event := InputEventScreenTouch.new()
 		event.index = 0
-		event.position = Vector2(480,360)
+		event.position = game.title_screen.deploy.get_global_rect().get_center()
 		event.pressed = pressed
 		Input.parse_input_event(event)
 		Input.flush_buffered_events()

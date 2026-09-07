@@ -20,18 +20,18 @@ var close_button: Button
 
 func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-	level_button = make_button("MISSION: ASHGATE",Rect2(330,285,300,36),select_level)
-	deploy = make_button("DEPLOY TO ASHGATE",Rect2(330,339,300,44),game.start_mission)
-	orders_button = make_button("FIELD ORDERS",Rect2(330,393,145,36),toggle_orders)
-	audio = make_button("AUDIO: ON",Rect2(485,393,145,36),toggle_audio)
-	options_button = make_button("OPTIONS",Rect2(330,442,145,36),open_options)
-	quit_button = make_button("QUIT",Rect2(485,442,145,36),quit_game)
-	speed_button = make_button("",Rect2(285,195,390,40),cycle_speed)
-	view_button = make_button("",Rect2(285,245,390,40),cycle_view)
-	volume_button = make_button("",Rect2(285,295,390,40),cycle_volume)
+	level_button = make_button("MISSION: ASHGATE",Rect2(550,120,340,44),select_level)
+	deploy = make_button("DEPLOY TO ASHGATE",Rect2(550,178,340,48),game.start_mission)
+	orders_button = make_button("FIELD ORDERS",Rect2(550,240,340,44),toggle_orders)
+	audio = make_button("AUDIO: ON",Rect2(550,298,340,44),toggle_audio)
+	options_button = make_button("OPTIONS",Rect2(550,356,340,44),open_options)
+	quit_button = make_button("QUIT",Rect2(550,414,340,44),quit_game)
+	speed_button = make_button("",Rect2(260,160,440,48),cycle_speed)
+	view_button = make_button("",Rect2(260,230,440,48),cycle_view)
+	volume_button = make_button("",Rect2(260,300,440,48),cycle_volume)
 	for button: Button in [speed_button,view_button,volume_button]:
 		button.hide()
-	close_button = make_button("BACK TO MENU",Rect2(355,355,250,40),close_panel)
+	close_button = make_button("BACK TO MENU",Rect2(330,405,300,44),close_panel)
 	close_button.hide()
 	visibility_changed.connect(func():
 		if visible:
@@ -138,9 +138,9 @@ func set_orders(open: bool) -> void:
 func quit_game() -> void:
 	get_tree().quit()
 
-func centered(value: String, y: float, font: Font, size: int, color: Color) -> void:
+func centered(value: String, y: float, font: Font, size: int, color: Color, center_x: float = 480.0) -> void:
 	var width := font.get_string_size(value,HORIZONTAL_ALIGNMENT_LEFT,-1,size).x
-	draw_string(font,Vector2((960-width)/2,y),value,HORIZONTAL_ALIGNMENT_LEFT,-1,size,color)
+	draw_string(font,Vector2(center_x-width/2,y),value,HORIZONTAL_ALIGNMENT_LEFT,-1,size,color)
 
 func _draw() -> void:
 	draw_rect(Rect2(0,0,960,540),Color(0.025,0.035,0.045,0.85))
@@ -150,25 +150,26 @@ func _draw() -> void:
 		for y in [34,506]:
 			draw_circle(Vector2(x,y),2,GOLD)
 	if show_options:
-		draw_rect(Rect2(130,100,700,310),Color("10161b"))
-		draw_rect(Rect2(130,100,700,310),GOLD,false,1)
-		centered("OPTIONS",151,DISPLAY_FONT,26,GOLD)
+		draw_rect(Rect2(80,75,800,400),Color("10161b"))
+		draw_rect(Rect2(80,75,800,400),GOLD,false,1)
+		centered("OPTIONS",123,DISPLAY_FONT,26,GOLD)
 		return
 	if show_orders:
 		draw_orders()
 		return
 	centered("N O N A T O F A B I O   P R E S E N T S",60,BODY_FONT,14,Color("a5a398"))
-	draw_line(Vector2(240,84),Vector2(437,84),GOLD)
-	draw_line(Vector2(523,84),Vector2(720,84),GOLD)
+	# Keep font sizes independent of the world view and rendering resolution.
+	draw_line(Vector2(88,122),Vector2(225,122),GOLD)
+	draw_line(Vector2(285,122),Vector2(422,122),GOLD)
 	var skull := preload("res://assets/effects/servo_skull.png")
-	draw_texture_rect(skull,Rect2(466,65,28,45),false,Color("dbc89d"))
-	centered("HIVE CITY",160,DISPLAY_FONT,49,GOLD)
-	centered("RAMPAGE",228,DISPLAY_FONT,68,Color("f0dfb7"))
-	centered("II",284,DISPLAY_FONT,54,GOLD)
-	draw_line(Vector2(310,262),Vector2(434,262),Color("796341"))
-	draw_line(Vector2(526,262),Vector2(650,262),Color("796341"))
-
-	centered("SECURE THE PUMPS. BREAK THE WAAAGH." if game.level == 2 else "THREE RELAYS. ONE SIEGE WALKER. NO RETREAT.",495,BODY_FONT,14,Color("a49b86"))
+	draw_texture_rect(skull,Rect2(241,103,28,45),false,Color("dbc89d"))
+	centered("HIVE CITY",218,DISPLAY_FONT,49,GOLD,255)
+	centered("RAMPAGE",286,DISPLAY_FONT,68,Color("f0dfb7"),255)
+	centered("II",355,DISPLAY_FONT,54,GOLD,255)
+	centered("SECURE THE PUMPS.",412,BODY_FONT,18,Color("a49b86"),255) if game.level==2 else centered("THREE RELAYS. ONE SIEGE WALKER.",412,BODY_FONT,16,Color("a49b86"),255)
+	centered("BREAK THE WAAAGH." if game.level==2 else "NO RETREAT.",437,BODY_FONT,16,Color("a49b86"),255)
+	draw_line(Vector2(497,115),Vector2(497,456),Color("64553d"))
+	centered("DEPLOYMENT",96,BODY_FONT,18,GOLD,720)
 
 func select_level() -> void:
 	game.level = 2 if game.level == 1 else 1
@@ -182,9 +183,9 @@ func sync_level() -> void:
 	queue_redraw()
 
 func draw_orders() -> void:
-	draw_rect(Rect2(130,100,700,310),Color("10161b"))
-	draw_rect(Rect2(130,100,700,310),GOLD,false,1)
-	centered("FIELD ORDERS",151,DISPLAY_FONT,26,GOLD)
+	draw_rect(Rect2(80,75,800,400),Color("10161b"))
+	draw_rect(Rect2(80,75,800,400),GOLD,false,1)
+	centered("FIELD ORDERS",123,DISPLAY_FONT,26,GOLD)
 	centered("Hold three pumps for 8 seconds. Defeat the Ork Warboss." if game.level == 2 else "Destroy three signal relays. Eliminate the siege walker.",191,BODY_FONT,20,Color("dfd7c4"))
 	centered("Reach extraction. Survive the streets of Ashgate.",216,BODY_FONT,20,Color("dfd7c4"))
 	var controls := "WASD  Move     Mouse  Aim     LMB  Fire     ESC  Pause"

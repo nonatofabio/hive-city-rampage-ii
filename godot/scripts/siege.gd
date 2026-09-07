@@ -507,7 +507,7 @@ func swing_chainsword(enemy: SiegeActor) -> void:
 	player.melee_time = 0.42
 	player.melee_direction = Iso.project(enemy.world_pos-player.world_pos).normalized()
 	aim_weapon(player,enemy.world_pos)
-	play_sound("chainsword",3,0.48)
+	play_sound("chainsword",3,0.32)
 	burst(enemy.world_pos,9,Color("f9c977"),95)
 	hit(enemy,70)
 

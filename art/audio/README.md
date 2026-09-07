@@ -7,7 +7,8 @@ No downloaded recordings are sampled by the current runtime effects.
 - Bolter: pressure crack, low-mid body, delayed breech clack; four variations.
 - Grenade: fast detonation, bass pressure, rubble and air tail; three variations.
 - Relay collapse: descending electrical suction, metal collapse and debris; two variations.
-- Chainsword: pitched motor and tooth rasp under load; three variations.
+- Chainsword: short dry rev, irregular low motor pulses and a noisy tooth rasp;
+  three variations, without the previous pitched buzz or reflection tail.
 
 Regenerate with Python and numpy:
 
